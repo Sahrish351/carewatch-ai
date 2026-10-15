@@ -1,12 +1,13 @@
 -- CareWatch AI Complete Database Schema & Seed Data
 -- PostgreSQL / Supabase
+-- Clean, idempotent, and rerun-safe migration
 
 -- Extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- 1. Profiles
 CREATE TABLE IF NOT EXISTS public.profiles (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   display_name TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
@@ -15,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 
 -- 2. Assessments
 CREATE TABLE IF NOT EXISTS public.assessments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'started',
@@ -28,7 +29,7 @@ CREATE TABLE IF NOT EXISTS public.assessments (
 
 -- 3. Symptoms
 CREATE TABLE IF NOT EXISTS public.symptoms (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   assessment_id UUID NOT NULL REFERENCES public.assessments(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   duration TEXT NOT NULL,
@@ -39,7 +40,7 @@ CREATE TABLE IF NOT EXISTS public.symptoms (
 
 -- 4. Assessment Answers
 CREATE TABLE IF NOT EXISTS public.assessment_answers (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   assessment_id UUID NOT NULL REFERENCES public.assessments(id) ON DELETE CASCADE,
   question TEXT NOT NULL,
   answer TEXT NOT NULL,
@@ -49,7 +50,7 @@ CREATE TABLE IF NOT EXISTS public.assessment_answers (
 
 -- 5. Agent Events
 CREATE TABLE IF NOT EXISTS public.agent_events (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   assessment_id UUID NOT NULL REFERENCES public.assessments(id) ON DELETE CASCADE,
   agent_type TEXT NOT NULL,
   event_type TEXT NOT NULL,
@@ -61,7 +62,7 @@ CREATE TABLE IF NOT EXISTS public.agent_events (
 
 -- 6. Risk Assessments
 CREATE TABLE IF NOT EXISTS public.risk_assessments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   assessment_id UUID NOT NULL REFERENCES public.assessments(id) ON DELETE CASCADE,
   tier TEXT NOT NULL CHECK (tier IN ('self-care', 'monitor', 'see-a-doctor', 'urgent')),
   summary TEXT NOT NULL,
@@ -75,7 +76,7 @@ CREATE TABLE IF NOT EXISTS public.risk_assessments (
 
 -- 7. Evidence Sources
 CREATE TABLE IF NOT EXISTS public.evidence_sources (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   topic TEXT NOT NULL,
   title TEXT NOT NULL,
   source_name TEXT NOT NULL,
@@ -84,12 +85,13 @@ CREATE TABLE IF NOT EXISTS public.evidence_sources (
   content TEXT NOT NULL,
   last_reviewed TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT uq_evidence_sources_topic_title UNIQUE (topic, title)
 );
 
 -- 8. Action Plans
 CREATE TABLE IF NOT EXISTS public.action_plans (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   assessment_id UUID NOT NULL REFERENCES public.assessments(id) ON DELETE CASCADE,
   summary TEXT NOT NULL,
   immediate_steps JSONB NOT NULL DEFAULT '[]'::jsonb,
@@ -103,7 +105,7 @@ CREATE TABLE IF NOT EXISTS public.action_plans (
 
 -- 9. Follow Ups
 CREATE TABLE IF NOT EXISTS public.follow_ups (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   assessment_id UUID NOT NULL REFERENCES public.assessments(id) ON DELETE CASCADE,
   scheduled_for TIMESTAMPTZ NOT NULL,
   status TEXT NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'due', 'completed', 'missed')),
@@ -113,7 +115,7 @@ CREATE TABLE IF NOT EXISTS public.follow_ups (
 
 -- 10. Follow Up Responses
 CREATE TABLE IF NOT EXISTS public.follow_up_responses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   follow_up_id UUID NOT NULL REFERENCES public.follow_ups(id) ON DELETE CASCADE,
   outcome TEXT NOT NULL CHECK (outcome IN ('better', 'same', 'worse', 'new_symptoms')),
   severity INT NOT NULL CHECK (severity >= 1 AND severity <= 10),
@@ -124,7 +126,7 @@ CREATE TABLE IF NOT EXISTS public.follow_up_responses (
 
 -- 11. Reassessments
 CREATE TABLE IF NOT EXISTS public.reassessments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   assessment_id UUID NOT NULL REFERENCES public.assessments(id) ON DELETE CASCADE,
   previous_follow_up_id UUID NOT NULL REFERENCES public.follow_ups(id) ON DELETE CASCADE,
   change_summary TEXT NOT NULL,
@@ -139,7 +141,7 @@ CREATE TABLE IF NOT EXISTS public.reassessments (
 
 -- 12. Timeline Events
 CREATE TABLE IF NOT EXISTS public.timeline_events (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   assessment_id UUID REFERENCES public.assessments(id) ON DELETE CASCADE,
   event_type TEXT NOT NULL,
@@ -151,7 +153,7 @@ CREATE TABLE IF NOT EXISTS public.timeline_events (
 
 -- 13. Health Passport
 CREATE TABLE IF NOT EXISTS public.health_passport (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   allergies JSONB NOT NULL DEFAULT '[]'::jsonb,
   medications JSONB NOT NULL DEFAULT '[]'::jsonb,
@@ -162,7 +164,7 @@ CREATE TABLE IF NOT EXISTS public.health_passport (
 
 -- 14. Health Documents
 CREATE TABLE IF NOT EXISTS public.health_documents (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   file_name TEXT NOT NULL,
   storage_path TEXT NOT NULL,
@@ -174,7 +176,7 @@ CREATE TABLE IF NOT EXISTS public.health_documents (
 
 -- 15. User Preferences
 CREATE TABLE IF NOT EXISTS public.user_preferences (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
   language TEXT NOT NULL DEFAULT 'en' CHECK (language IN ('en', 'ur_roman')),
   timezone TEXT NOT NULL DEFAULT 'UTC',
@@ -183,7 +185,7 @@ CREATE TABLE IF NOT EXISTS public.user_preferences (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
 );
 
--- Indexes for performance
+-- Indexes for query performance
 CREATE INDEX IF NOT EXISTS idx_assessments_user_id ON public.assessments(user_id);
 CREATE INDEX IF NOT EXISTS idx_assessments_status ON public.assessments(status);
 CREATE INDEX IF NOT EXISTS idx_symptoms_assessment ON public.symptoms(assessment_id);
@@ -195,7 +197,7 @@ CREATE INDEX IF NOT EXISTS idx_follow_ups ON public.follow_ups(assessment_id);
 CREATE INDEX IF NOT EXISTS idx_timeline_events_user ON public.timeline_events(user_id);
 CREATE INDEX IF NOT EXISTS idx_evidence_topic ON public.evidence_sources(topic);
 
--- Enable RLS on all user tables
+-- Enable Row Level Security (RLS) on all tables
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.assessments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.symptoms ENABLE ROW LEVEL SECURITY;
@@ -212,48 +214,136 @@ ALTER TABLE public.health_documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.evidence_sources ENABLE ROW LEVEL SECURITY;
 
--- Evidence sources is read-only public reference
+-- Idempotent RLS Policies: Safely drop prior policies if they exist, then recreate
+
+-- 1. Evidence sources (Public curated reference)
+DROP POLICY IF EXISTS "Allow authenticated read on evidence_sources" ON public.evidence_sources;
 CREATE POLICY "Allow authenticated read on evidence_sources"
   ON public.evidence_sources FOR SELECT TO authenticated, anon USING (true);
 
--- User-scoped policies
-CREATE POLICY "Users can view own profile" ON public.profiles FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can view own assessments" ON public.assessments FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can view own timeline" ON public.timeline_events FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own health_passport" ON public.health_passport FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own documents" ON public.health_documents FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can manage own preferences" ON public.user_preferences FOR ALL USING (auth.uid() = user_id);
+-- 2. Profiles (Owner restricted visibility and write)
+DROP POLICY IF EXISTS "Users can view and manage own profile" ON public.profiles;
+CREATE POLICY "Users can view and manage own profile"
+  ON public.profiles FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
--- Assessment child tables policy (based on assessment ownership)
-CREATE POLICY "Users can manage own symptoms" ON public.symptoms FOR ALL 
-  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
+-- 3. Assessments (Owner restricted visibility and write)
+DROP POLICY IF EXISTS "Users can view and manage own assessments" ON public.assessments;
+CREATE POLICY "Users can view and manage own assessments"
+  ON public.assessments FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can manage own answers" ON public.assessment_answers FOR ALL 
-  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
+-- 4. Timeline Events (Owner restricted visibility and write)
+DROP POLICY IF EXISTS "Users can view and manage own timeline" ON public.timeline_events;
+CREATE POLICY "Users can view and manage own timeline"
+  ON public.timeline_events FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can view own agent_events" ON public.agent_events FOR ALL 
-  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
+-- 5. Health Passport (Owner restricted visibility and write)
+DROP POLICY IF EXISTS "Users can view and manage own health_passport" ON public.health_passport;
+CREATE POLICY "Users can view and manage own health_passport"
+  ON public.health_passport FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can view own risk_assessments" ON public.risk_assessments FOR ALL 
-  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
+-- 6. Health Documents (Owner restricted visibility and write)
+DROP POLICY IF EXISTS "Users can view and manage own documents" ON public.health_documents;
+CREATE POLICY "Users can view and manage own documents"
+  ON public.health_documents FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can view own action_plans" ON public.action_plans FOR ALL 
-  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
+-- 7. User Preferences (Owner restricted visibility and write)
+DROP POLICY IF EXISTS "Users can view and manage own preferences" ON public.user_preferences;
+CREATE POLICY "Users can view and manage own preferences"
+  ON public.user_preferences FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can manage own follow_ups" ON public.follow_ups FOR ALL 
-  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
+-- 8. Symptoms (Child table restricted through assessment ownership)
+DROP POLICY IF EXISTS "Users can view and manage own symptoms" ON public.symptoms;
+CREATE POLICY "Users can view and manage own symptoms"
+  ON public.symptoms FOR ALL
+  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()))
+  WITH CHECK (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
 
-CREATE POLICY "Users can manage own follow_up_responses" ON public.follow_up_responses FOR ALL 
+-- 9. Assessment Answers (Child table restricted through assessment ownership)
+DROP POLICY IF EXISTS "Users can view and manage own answers" ON public.assessment_answers;
+CREATE POLICY "Users can view and manage own answers"
+  ON public.assessment_answers FOR ALL
+  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()))
+  WITH CHECK (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
+
+-- 10. Agent Events (Child table restricted through assessment ownership)
+DROP POLICY IF EXISTS "Users can view and manage own agent_events" ON public.agent_events;
+CREATE POLICY "Users can view and manage own agent_events"
+  ON public.agent_events FOR ALL
+  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()))
+  WITH CHECK (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
+
+-- 11. Risk Assessments (Child table restricted through assessment ownership)
+DROP POLICY IF EXISTS "Users can view and manage own risk_assessments" ON public.risk_assessments;
+CREATE POLICY "Users can view and manage own risk_assessments"
+  ON public.risk_assessments FOR ALL
+  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()))
+  WITH CHECK (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
+
+-- 12. Action Plans (Child table restricted through assessment ownership)
+DROP POLICY IF EXISTS "Users can view and manage own action_plans" ON public.action_plans;
+CREATE POLICY "Users can view and manage own action_plans"
+  ON public.action_plans FOR ALL
+  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()))
+  WITH CHECK (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
+
+-- 13. Follow Ups (Child table restricted through assessment ownership)
+DROP POLICY IF EXISTS "Users can view and manage own follow_ups" ON public.follow_ups;
+CREATE POLICY "Users can view and manage own follow_ups"
+  ON public.follow_ups FOR ALL
+  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()))
+  WITH CHECK (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
+
+-- 14. Follow Up Responses (Child table restricted through follow_up -> assessment ownership)
+DROP POLICY IF EXISTS "Users can view and manage own follow_up_responses" ON public.follow_up_responses;
+CREATE POLICY "Users can view and manage own follow_up_responses"
+  ON public.follow_up_responses FOR ALL
   USING (follow_up_id IN (
+    SELECT f.id FROM public.follow_ups f 
+    JOIN public.assessments a ON f.assessment_id = a.id 
+    WHERE a.user_id = auth.uid()
+  ))
+  WITH CHECK (follow_up_id IN (
     SELECT f.id FROM public.follow_ups f 
     JOIN public.assessments a ON f.assessment_id = a.id 
     WHERE a.user_id = auth.uid()
   ));
 
-CREATE POLICY "Users can view own reassessments" ON public.reassessments FOR ALL 
-  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
+-- 15. Reassessments (Child table restricted through assessment ownership)
+DROP POLICY IF EXISTS "Users can view and manage own reassessments" ON public.reassessments;
+CREATE POLICY "Users can view and manage own reassessments"
+  ON public.reassessments FOR ALL
+  USING (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()))
+  WITH CHECK (assessment_id IN (SELECT id FROM public.assessments WHERE user_id = auth.uid()));
 
--- Insert Curated Evidence Sources
+-- Automatic Profile Creation Trigger on Auth Signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (user_id, display_name)
+  VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'display_name', NEW.email))
+  ON CONFLICT (user_id) DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Insert Curated Evidence Sources (Idempotent with ON CONFLICT)
 INSERT INTO public.evidence_sources (topic, title, source_name, source_url, summary, content, last_reviewed)
 VALUES 
 (
@@ -285,21 +375,20 @@ VALUES
 ),
 (
   'abdominal',
-  'Evaluation of Acute Abdominal Pain in Adults',
-  'World Health Organization & Clinical Practice Guidelines',
-  'https://www.who.int/publications/i/item/acute-abdomen-guidelines',
+  'Clinical Guidance on Acute Abdominal Presentations',
+  'World Health Organization (WHO)',
+  'https://www.who.int/teams/integrated-health-services/clinical-services-and-systems/surgical-care',
   'Triage protocol for abdominal pain: distinguishing diffuse mild discomfort from localized surgical acute abdomen indicators.',
   'Critical red flags include acute severe localized pain (particularly right lower quadrant), rigid abdomen, persistent vomiting, high fever, or gastrointestinal bleeding.',
   '2025-07-20'
 ),
 (
   'fever',
-  'Adult Fever Monitoring Protocol and Hydration Guidelines',
-  'Mayo Clinic Clinical Reference',
+  'Adult Fever Causes and Home Care Thresholds',
+  'Mayo Clinic',
   'https://www.mayoclinic.org/diseases-conditions/fever/symptoms-causes/syc-20352940',
   'Safe monitoring intervals, fluid replenishment targets, and threshold indicators for non-emergent vs urgent medical consultations.',
   'Fevers up to 38.9C (102F) in adults without distress are often immune responses to viral illness. Prompt clinical attention is needed if fever exceeds 39.4C (103F), lasts >72 hours, or fails to respond to antipyretics.',
   '2025-09-25'
 )
-ON CONFLICT DO NOTHING;
-
+ON CONFLICT (topic, title) DO NOTHING;
