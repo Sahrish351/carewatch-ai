@@ -44,6 +44,8 @@ function LoginForm() {
     citizen: {
       title: "Patient / Citizen Access",
       subtitle: "Review your personal recovery journey, follow-ups, and Health Passport",
+      demoEmail: "patient@carewatch.ai",
+      demoPassword: "carewatch2026",
       demoName: "Sarah Jenkins (Patient)",
       demoDetail: "Active 24h headache check-in ready for submission",
       accentBg: "bg-[#EFF7F1]",
@@ -55,6 +57,8 @@ function LoginForm() {
     clinician: {
       title: "Clinician Triage Workspace",
       subtitle: "Access assigned patient cases, triage queues, and symptom escalation alerts",
+      demoEmail: "dr.thorne@carewatch.ai",
+      demoPassword: "carewatch2026",
       demoName: "Dr. Aris Thorne, MD (Clinician)",
       demoDetail: "Physician triage queue with 2 escalated patient cases",
       accentBg: "bg-sky-50",
@@ -66,6 +70,8 @@ function LoginForm() {
     admin: {
       title: "System Administrator Console",
       subtitle: "Monitor Gemini 3.8 Flash telemetry, database tables, and audit logs",
+      demoEmail: "admin@carewatch.ai",
+      demoPassword: "carewatch2026",
       demoName: "System Administrator (Admin)",
       demoDetail: "Real-time agent execution stream & security metrics",
       accentBg: "bg-amber-50",
@@ -74,6 +80,21 @@ function LoginForm() {
       activeTabStyle: "bg-[#D97706] text-white shadow-xs",
       defaultPath: "/admin",
     },
+  };
+
+  // Initialize with citizen credentials
+  React.useEffect(() => {
+    if (!email) {
+      setEmail(roleMeta[selectedRole].demoEmail);
+      setPassword(roleMeta[selectedRole].demoPassword);
+    }
+  }, []);
+
+  const selectRole = (role: UserRole) => {
+    setSelectedRole(role);
+    setEmail(roleMeta[role].demoEmail);
+    setPassword(roleMeta[role].demoPassword);
+    setErrorMsg("");
   };
 
   const currentMeta = roleMeta[selectedRole];
@@ -185,10 +206,7 @@ function LoginForm() {
             {/* Patient Option */}
             <button
               type="button"
-              onClick={() => {
-                setSelectedRole("citizen");
-                setErrorMsg("");
-              }}
+              onClick={() => selectRole("citizen")}
               className={cn(
                 "py-3 px-2 sm:px-4 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 cursor-pointer",
                 selectedRole === "citizen"
@@ -203,10 +221,7 @@ function LoginForm() {
             {/* Clinician Option */}
             <button
               type="button"
-              onClick={() => {
-                setSelectedRole("clinician");
-                setErrorMsg("");
-              }}
+              onClick={() => selectRole("clinician")}
               className={cn(
                 "py-3 px-2 sm:px-4 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 cursor-pointer",
                 selectedRole === "clinician"
@@ -221,10 +236,7 @@ function LoginForm() {
             {/* Administrator Option */}
             <button
               type="button"
-              onClick={() => {
-                setSelectedRole("admin");
-                setErrorMsg("");
-              }}
+              onClick={() => selectRole("admin")}
               className={cn(
                 "py-3 px-2 sm:px-4 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 cursor-pointer",
                 selectedRole === "admin"

@@ -47,28 +47,28 @@ export async function updateSession(request: NextRequest) {
     }
   }
 
-  // 2. Check for active demo session cookie if no real Supabase user
-  if (!activeUser) {
-    const demoCookie = request.cookies.get("carewatch_session")?.value;
-    if (demoCookie) {
-      try {
-        const parsed = JSON.parse(decodeURIComponent(demoCookie));
-        activeUser = parsed;
-        userRole = parsed.role || "citizen";
-      } catch {}
-    }
-
-    if (!activeUser) {
-      const legacyToken = request.cookies.get("carewatch_auth_token")?.value;
-      if (legacyToken) {
-        activeUser = {
-          id: "demo-user-citizen",
-          email: "patient@carewatch.ai",
-          name: "Sarah Jenkins",
-          role: "citizen",
-        };
-        userRole = "citizen";
+  // 2. Check for active demo session cookie
+  const demoCookie = request.cookies.get("carewatch_session")?.value;
+  if (demoCookie) {
+    try {
+      const parsed = JSON.parse(decodeURIComponent(demoCookie));
+      if (parsed) {
+        if (!activeUser) activeUser = parsed;
+        if (parsed.role) userRole = parsed.role;
       }
+    } catch {}
+  }
+
+  if (!activeUser) {
+    const legacyToken = request.cookies.get("carewatch_auth_token")?.value;
+    if (legacyToken) {
+      activeUser = {
+        id: "demo-user-citizen",
+        email: "patient@carewatch.ai",
+        name: "Sarah Jenkins",
+        role: "citizen",
+      };
+      userRole = "citizen";
     }
   }
 
