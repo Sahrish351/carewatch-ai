@@ -32,17 +32,17 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles = {
       primary:
-        "bg-[#2A6F6F] hover:bg-[#225959] text-white focus-visible:ring-[#2A6F6F]",
+        "bg-[#174E4A] hover:bg-[#103835] text-white focus-visible:ring-[#174E4A]",
       secondary:
-        "bg-[#8FB996] hover:bg-[#7ca883] text-[#173737] focus-visible:ring-[#8FB996]",
+        "bg-[#DDEBE2] hover:bg-[#cbe0d2] text-[#174E4A] focus-visible:ring-[#174E4A]",
       outline:
-        "border border-[#D1DDD3] bg-white hover:bg-[#F2F7F4] text-[#173737] focus-visible:ring-[#2A6F6F]",
+        "border border-[#EDE8DF] bg-white hover:bg-[#FAF8F3] text-[#263735] focus-visible:ring-[#174E4A]",
       ghost:
-        "text-[#173737] hover:bg-[#EBF3ED] focus-visible:ring-[#2A6F6F]",
+        "text-[#263735] hover:bg-[#EFF7F1] focus-visible:ring-[#174E4A]",
       urgent:
-        "bg-[#E0674B] hover:bg-[#cb4628] text-white focus-visible:ring-[#E0674B]",
+        "bg-[#DC2626] hover:bg-[#B91C1C] text-white focus-visible:ring-[#DC2626]",
       subtle:
-        "bg-[#EBF3ED] text-[#2A6F6F] hover:bg-[#d8e8dc] focus-visible:ring-[#2A6F6F]",
+        "bg-[#EFF7F1] text-[#174E4A] hover:bg-[#DDEBE2] focus-visible:ring-[#174E4A]",
     };
 
     return (

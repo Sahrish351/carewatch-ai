@@ -15,9 +15,12 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-export function AppHeader() {
+export function AppHeader({
+  onToggleMobileSidebar,
+}: {
+  onToggleMobileSidebar?: () => void;
+}) {
   const pathname = usePathname();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentLang, setCurrentLang] = useState<"en" | "ur_roman">("en");
   const [resetting, setResetting] = useState(false);
   const [resetDone, setResetDone] = useState(false);
@@ -48,14 +51,15 @@ export function AppHeader() {
   };
 
   return (
-    <header className="h-20 border-b border-[#EDE8DF] bg-white/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-40">
+    <header className="h-20 border-b border-[#EDE8DF] bg-white/90 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-20">
       <div className="flex items-center gap-4">
         {/* Mobile toggle */}
         <button
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden p-2 rounded-lg text-[#173737] hover:bg-[#EDE8DF]"
+          onClick={onToggleMobileSidebar}
+          className="lg:hidden p-2 rounded-xl text-[#263735] hover:bg-[#FAF8F3] transition-colors"
+          aria-label="Open mobile navigation"
         >
-          {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          <Menu className="w-5 h-5 text-[#174E4A]" />
         </button>
 
         <div>

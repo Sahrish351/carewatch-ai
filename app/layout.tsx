@@ -30,7 +30,7 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans bg-[#FAF7F2] text-[#173737]">
+      <body className="min-h-full flex flex-col font-sans bg-[#FAF8F3] text-[#263735]">
         {children}
       </body>
     </html>

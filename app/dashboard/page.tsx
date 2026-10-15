@@ -27,8 +27,12 @@ import {
   ShieldCheck,
   TrendingUp,
   HeartPulse,
+  GitCompare,
+  FileText,
+  Lock,
 } from "lucide-react";
-import type { Assessment, FollowUp, TimelineEvent, ActionPlan, RiskAssessment } from "@/types/database";
+import type { Assessment, FollowUp, TimelineEvent, ActionPlan, RiskAssessment, HealthDocument, HealthPassport } from "@/types/database";
+import { cn } from "@/lib/utils";
 
 export default function DashboardPage() {
   const [user, setUser] = useState<{ id: string; name: string; email: string; role: string; isDemo?: boolean } | null>(null);
@@ -37,6 +41,8 @@ export default function DashboardPage() {
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [actionPlans, setActionPlans] = useState<ActionPlan[]>([]);
   const [riskAssessment, setRiskAssessment] = useState<RiskAssessment | undefined>();
+  const [passport, setPassport] = useState<HealthPassport | undefined>();
+  const [documents, setDocuments] = useState<HealthDocument[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,11 +61,15 @@ export default function DashboardPage() {
         const userFollowUps = healthStore.getFollowUps();
         const userTimeline = healthStore.getTimelineEvents();
         const userPlans = healthStore.getAllActionPlans();
+        const userPassport = healthStore.getHealthPassport("demo-user-carewatch");
+        const userDocs = healthStore.getDocuments();
 
         setAssessments(userAssessments);
         setFollowUps(userFollowUps);
         setTimeline(userTimeline);
         setActionPlans(userPlans);
+        setPassport(userPassport);
+        setDocuments(userDocs);
 
         if (userAssessments.length > 0) {
           setRiskAssessment(healthStore.getRiskAssessment(userAssessments[0].id));
@@ -73,14 +83,14 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <div className="space-y-8 max-w-6xl mx-auto">
-        {/* Role Portal Alert if Clinician or Admin logged in */}
+      <div className="space-y-8 max-w-6xl mx-auto antialiased">
+        {/* Role Portal Alert if Clinician or Admin is logged in */}
         {user && (user.role === "clinician" || user.role === "admin") && (
-          <div className="p-3.5 rounded-2xl bg-[#E0F2FE] border border-[#0284C7]/30 flex items-center justify-between text-xs text-[#0369A1]">
+          <div className="p-3.5 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-between text-xs text-sky-950">
             <div className="flex items-center gap-2">
               <Stethoscope className="w-4 h-4 text-[#0284C7]" />
               <span>
-                You are viewing the Citizen Patient interface as <strong>{user.name}</strong> ({user.role.toUpperCase()}).
+                You are currently previewing the Patient Portal as <strong>{user.name}</strong> ({user.role.toUpperCase()}).
               </span>
             </div>
             <Link href={user.role === "admin" ? "/admin" : "/clinician"}>
@@ -91,15 +101,15 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Demo Data Notice if in demo mode */}
+        {/* Demo Mode Notice */}
         {user?.isDemo && (
-          <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-900 flex items-center justify-between">
+          <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <span className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-              <strong>Demonstration Mode:</strong> Illustrative patient journey loaded for testing the complete follow-up and reassessment loop.
+              <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+              <span><strong>Demonstration Mode:</strong> Illustrative patient journey loaded (Sarah Jenkins) for testing the continuous follow-up loop.</span>
             </span>
-            <span className="text-[11px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
-              Sample Case: Sarah Jenkins
+            <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded shrink-0 self-start sm:self-auto">
+              Sample Case
             </span>
           </div>
         )}
@@ -107,67 +117,67 @@ export default function DashboardPage() {
         {/* Welcome Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2A6F6F] bg-[#EBF3ED] px-3 py-1 rounded-full mb-2">
-              <HeartPulse className="w-3.5 h-3.5 text-[#2A6F6F]" />
-              <span>Personal Health Safety Net</span>
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold text-[#174E4A] bg-[#EFF7F1] border border-[#DDEBE2] px-3 py-1 rounded-full mb-2">
+              <HeartPulse className="w-3.5 h-3.5 text-[#174E4A]" />
+              <span>Personal Recovery Journey</span>
             </div>
-            <h1 className="font-display text-3xl font-bold text-[#173737]">
+            <h1 className="font-display text-3xl font-bold text-[#263735]">
               Welcome back, {user?.name || "Patient"}
             </h1>
-            <p className="text-sm text-[#657777]">
-              CareWatch AI is monitoring your symptom progression and scheduled safety checks.
+            <p className="text-sm text-[#627472]">
+              CareWatch AI is monitoring your symptoms and scheduled safety checks.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <Link href="/assessment/new">
-              <Button size="md" className="shadow-sm">
-                <PlusCircle className="w-4 h-4 mr-1.5" /> Start a Health Check
+              <Button size="md" className="shadow-xs font-bold bg-[#174E4A] hover:bg-[#103835] text-white text-xs">
+                <PlusCircle className="w-4 h-4 mr-1.5" /> Start New Assessment
               </Button>
             </Link>
           </div>
         </div>
 
-        {/* Top Banner Alert if Check-in is due */}
+        {/* Follow-Up Due Notification Banner */}
         {dueFollowUp && (
-          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in">
+          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in shadow-2xs">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-900 flex items-center justify-center shrink-0 mt-0.5">
-                <Clock className="w-5 h-5 text-amber-700" />
+              <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 mt-0.5">
+                <Clock className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
                     Follow-Up Check-in Due Now
                   </span>
-                  <span className="text-[10px] bg-amber-200 text-amber-900 px-2 py-0.5 rounded font-bold">
+                  <span className="text-[10px] bg-amber-200 text-amber-950 px-2 py-0.5 rounded font-bold">
                     Action Needed
                   </span>
                 </div>
-                <p className="text-xs text-amber-900 mt-1 leading-relaxed">
-                  Your 24-hour check-in for <strong>&quot;{activeAssessment?.title || "Persistent Headache"}&quot;</strong> is ready. Please report how your symptoms have progressed.
+                <p className="text-xs text-amber-950 mt-1 leading-relaxed">
+                  Your scheduled check-in for <strong>&quot;{activeAssessment?.title || "Persistent Headache"}&quot;</strong> is ready. Please report how your symptoms have progressed.
                 </p>
               </div>
             </div>
             <Link href={`/follow-ups/${dueFollowUp.id}`}>
-              <Button size="sm" className="bg-amber-800 hover:bg-amber-900 text-white shrink-0">
+              <Button size="sm" className="bg-amber-800 hover:bg-amber-900 text-white shrink-0 text-xs font-bold">
                 Complete Check-in <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </Button>
             </Link>
           </div>
         )}
 
-        {/* Grid: Active Journey & Upcoming Check-in */}
+        {/* Main Grid: Current Episode & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Active Health Journey */}
+          {/* Current Health Episode */}
           <div className="lg:col-span-7">
-            <Card className="h-full flex flex-col justify-between">
-              <CardHeader className="flex flex-row items-center justify-between pb-3">
+            <Card className="h-full flex flex-col justify-between border-[#EDE8DF] shadow-xs">
+              <CardHeader className="flex flex-row items-center justify-between pb-3 border-b border-[#EDE8DF]">
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#2A6F6F]">
-                    Current Episode
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#174E4A]">
+                    Current Health Episode
                   </span>
-                  <CardTitle className="text-xl mt-1">
+                  <CardTitle className="text-xl mt-1 text-[#263735]">
                     {activeAssessment ? activeAssessment.title : "No Active Journey"}
                   </CardTitle>
                 </div>
@@ -176,52 +186,55 @@ export default function DashboardPage() {
                 )}
               </CardHeader>
 
-              <CardContent className="space-y-4 flex-1">
+              <CardContent className="space-y-4 flex-1 p-5">
                 {activeAssessment ? (
                   <>
-                    <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#EDE8DF]">
-                      <span className="text-[11px] font-semibold uppercase text-[#657777] block mb-1">
+                    <div className="p-3.5 rounded-xl bg-[#FAF8F3] border border-[#EDE8DF]">
+                      <span className="text-[10px] font-bold uppercase text-[#627472] block mb-1">
                         Reported Concern
                       </span>
-                      <p className="text-sm font-medium text-[#173737]">
+                      <p className="text-xs font-semibold text-[#263735]">
                         &quot;{activeAssessment.primary_concern}&quot;
                       </p>
                     </div>
 
                     {riskAssessment && (
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-[#657777]">Triage Guidance:</span>
-                          <span className="font-semibold text-[#173737]">
+                      <div className="space-y-2 text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[#627472]">Guidance:</span>
+                          <span className="font-bold text-[#263735]">
                             {riskAssessment.recommended_next_step}
                           </span>
                         </div>
-                        <p className="text-xs text-[#657777] leading-relaxed">
+                        <p className="text-[#627472] leading-relaxed">
                           {riskAssessment.summary}
                         </p>
                       </div>
                     )}
 
-                    <div className="pt-2 flex items-center justify-between text-xs text-[#657777] border-t border-[#F4EFEB]">
+                    <div className="pt-2 flex items-center justify-between text-xs text-[#627472] border-t border-[#EDE8DF]">
                       <span>Started: {formatDate(activeAssessment.started_at)}</span>
                       <Link
                         href={`/assessment/${activeAssessment.id}/result`}
-                        className="text-[#2A6F6F] font-semibold hover:underline flex items-center gap-1"
+                        className="text-[#174E4A] font-bold hover:underline flex items-center gap-1"
                       >
                         View Full Clinical Plan <ChevronRight className="w-3.5 h-3.5" />
                       </Link>
                     </div>
                   </>
                 ) : (
+                  /* Clean Empty State */
                   <div className="py-8 text-center space-y-3">
-                    <CheckCircle2 className="w-10 h-10 text-[#8FB996] mx-auto" />
-                    <h3 className="font-bold text-sm text-[#173737]">Your care journey starts here</h3>
-                    <p className="text-xs text-[#657777] max-w-sm mx-auto">
-                      Describe what&apos;s bothering you and CareWatch will guide you through an adaptive, safety-informed assessment.
+                    <div className="w-12 h-12 rounded-full bg-[#EFF7F1] text-[#174E4A] flex items-center justify-center mx-auto">
+                      <HeartPulse className="w-6 h-6 text-[#174E4A]" />
+                    </div>
+                    <h3 className="font-bold text-sm text-[#263735]">No active health assessments</h3>
+                    <p className="text-xs text-[#627472] max-w-sm mx-auto">
+                      Whenever you experience a symptom or concern, start a health check to get adaptive triage and a structured recovery follow-up.
                     </p>
                     <Link href="/assessment/new">
-                      <Button size="sm" className="mt-2">
-                        Start Your First Health Check
+                      <Button size="sm" className="mt-2 text-xs bg-[#174E4A] hover:bg-[#103835] text-white">
+                        Start Your First Assessment
                       </Button>
                     </Link>
                   </div>
@@ -230,113 +243,155 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          {/* Quick Actions & Passport Overview */}
+          {/* Quick Actions Shortcuts */}
           <div className="lg:col-span-5 space-y-6">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
-                <CardDescription>Direct shortcuts to your care records</CardDescription>
+            <Card className="border-[#EDE8DF] shadow-xs">
+              <CardHeader className="pb-3 border-b border-[#EDE8DF]">
+                <CardTitle className="text-base text-[#263735]">Care Shortcuts</CardTitle>
+                <CardDescription className="text-xs text-[#627472]">
+                  Direct access to your health records and follow-ups
+                </CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-2 gap-3 pt-0">
+              <CardContent className="grid grid-cols-2 gap-3 p-4">
                 <Link
                   href="/assessment/new"
-                  className="p-3.5 rounded-xl border border-[#EDE8DF] hover:border-[#2A6F6F]/40 hover:bg-[#F0F7F7] transition-all flex flex-col gap-2"
+                  className="p-3.5 rounded-xl border border-[#EDE8DF] hover:border-[#174E4A]/40 hover:bg-[#EFF7F1] transition-all flex flex-col gap-2"
                 >
-                  <PlusCircle className="w-5 h-5 text-[#2A6F6F]" />
-                  <span className="text-xs font-bold text-[#173737]">New Assessment</span>
+                  <PlusCircle className="w-5 h-5 text-[#174E4A]" />
+                  <span className="text-xs font-bold text-[#263735]">New Assessment</span>
                 </Link>
                 <Link
                   href="/timeline"
-                  className="p-3.5 rounded-xl border border-[#EDE8DF] hover:border-[#2A6F6F]/40 hover:bg-[#F0F7F7] transition-all flex flex-col gap-2"
+                  className="p-3.5 rounded-xl border border-[#EDE8DF] hover:border-[#174E4A]/40 hover:bg-[#EFF7F1] transition-all flex flex-col gap-2"
                 >
-                  <Milestone className="w-5 h-5 text-[#2A6F6F]" />
-                  <span className="text-xs font-bold text-[#173737]">View Timeline</span>
+                  <Milestone className="w-5 h-5 text-[#174E4A]" />
+                  <span className="text-xs font-bold text-[#263735]">Recovery Timeline</span>
                 </Link>
                 <Link
                   href="/follow-ups"
-                  className="p-3.5 rounded-xl border border-[#EDE8DF] hover:border-[#2A6F6F]/40 hover:bg-[#F0F7F7] transition-all flex flex-col gap-2"
+                  className="p-3.5 rounded-xl border border-[#EDE8DF] hover:border-[#174E4A]/40 hover:bg-[#EFF7F1] transition-all flex flex-col gap-2"
                 >
                   <Clock className="w-5 h-5 text-amber-700" />
-                  <span className="text-xs font-bold text-[#173737]">Follow-up Loop</span>
+                  <span className="text-xs font-bold text-[#263735]">Follow-Up Loop</span>
                 </Link>
                 <Link
                   href="/health-passport"
-                  className="p-3.5 rounded-xl border border-[#EDE8DF] hover:border-[#2A6F6F]/40 hover:bg-[#F0F7F7] transition-all flex flex-col gap-2"
+                  className="p-3.5 rounded-xl border border-[#EDE8DF] hover:border-[#174E4A]/40 hover:bg-[#EFF7F1] transition-all flex flex-col gap-2"
                 >
-                  <FileBadge2 className="w-5 h-5 text-[#2A6F6F]" />
-                  <span className="text-xs font-bold text-[#173737]">Health Passport</span>
+                  <FileBadge2 className="w-5 h-5 text-[#174E4A]" />
+                  <span className="text-xs font-bold text-[#263735]">Health Passport</span>
                 </Link>
               </CardContent>
             </Card>
 
-            {/* Active Action Plan Snippet */}
-            {actionPlans.length > 0 && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <FileCheck2 className="w-4 h-4 text-[#2A6F6F]" />
-                      Active Action Plan
-                    </CardTitle>
-                    <Link href="/action-plans" className="text-xs text-[#2A6F6F] font-semibold hover:underline">
-                      View all
-                    </Link>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-2 pt-0">
-                  <p className="text-xs text-[#657777]">
-                    {actionPlans[0].summary}
-                  </p>
-                  <div className="space-y-1.5 pt-1">
-                    {actionPlans[0].immediate_steps.slice(0, 2).map((step, i) => (
-                      <div key={i} className="flex items-start gap-2 text-xs text-[#173737]">
-                        <span className="w-4 h-4 rounded-full bg-[#EBF3ED] text-[#2A6F6F] font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5">
-                          {i + 1}
-                        </span>
-                        <span>{step}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Health Passport Compact Preview */}
+            <Card className="border-[#EDE8DF] shadow-xs">
+              <CardHeader className="pb-2 border-b border-[#EDE8DF] flex flex-row items-center justify-between">
+                <CardTitle className="text-base text-[#263735] flex items-center gap-2">
+                  <FileBadge2 className="w-4 h-4 text-[#174E4A]" />
+                  Health Passport Summary
+                </CardTitle>
+                <Link href="/health-passport" className="text-xs font-bold text-[#174E4A] hover:underline">
+                  Edit
+                </Link>
+              </CardHeader>
+              <CardContent className="p-4 space-y-2 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-[#627472]">Allergies:</span>
+                  <span className="font-semibold text-[#263735]">
+                    {passport?.allergies?.length ? passport.allergies.join(", ") : "None reported"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#627472]">Medications:</span>
+                  <span className="font-semibold text-[#263735]">
+                    {passport?.medications?.length ? passport.medications.join(", ") : "None reported"}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#627472]">Conditions:</span>
+                  <span className="font-semibold text-[#263735]">
+                    {passport?.conditions?.length ? passport.conditions.join(", ") : "None reported"}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
-        {/* Timeline Events Snippet */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
+        {/* Symptom Trajectory Comparison Section */}
+        <Card className="border-[#EDE8DF] shadow-xs">
+          <CardHeader className="pb-3 border-b border-[#EDE8DF] flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-lg">Recent Health Timeline</CardTitle>
-              <CardDescription>
-                Chronological record of your reported symptoms, AI recommendations, and check-ins
+              <CardTitle className="text-base text-[#263735] flex items-center gap-2">
+                <GitCompare className="w-4 h-4 text-[#174E4A]" />
+                Symptom Trajectory Analysis
+              </CardTitle>
+              <CardDescription className="text-xs text-[#627472]">
+                Comparing initial intake severity against follow-up check-in scores
               </CardDescription>
             </div>
-            <Link href="/timeline" className="text-xs text-[#2A6F6F] font-semibold hover:underline flex items-center gap-1">
+            <Link href="/timeline" className="text-xs text-[#174E4A] font-bold hover:underline flex items-center gap-1">
+              View Detailed Timeline <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </CardHeader>
+          <CardContent className="p-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 rounded-2xl bg-[#FAF8F3] border border-[#EDE8DF]">
+                <span className="text-[10px] font-bold uppercase text-[#627472] block">Baseline Severity</span>
+                <div className="text-2xl font-bold text-[#263735] mt-1">4 / 10</div>
+                <div className="text-[11px] text-[#627472] mt-0.5">Recorded at initial assessment</div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200">
+                <span className="text-[10px] font-bold uppercase text-amber-900 block">Check-in Severity</span>
+                <div className="text-2xl font-bold text-amber-950 mt-1">7 / 10</div>
+                <div className="text-[11px] text-amber-800 mt-0.5">+3 escalation (New dizziness)</div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#EFF7F1] border border-[#DDEBE2]">
+                <span className="text-[10px] font-bold uppercase text-[#174E4A] block">Care Pathway Status</span>
+                <div className="text-sm font-bold text-[#174E4A] mt-2">See a Doctor Today</div>
+                <div className="text-[11px] text-[#627472] mt-0.5">Reassessment triggered</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Timeline Events Snippet */}
+        <Card className="border-[#EDE8DF] shadow-xs">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-[#EDE8DF] pb-3">
+            <div>
+              <CardTitle className="text-base text-[#263735]">Recent Health Timeline</CardTitle>
+              <CardDescription className="text-xs text-[#627472]">
+                Audit trail of reported symptoms, adaptive questions, and scheduled follow-ups
+              </CardDescription>
+            </div>
+            <Link href="/timeline" className="text-xs text-[#174E4A] font-bold hover:underline flex items-center gap-1">
               Full Timeline <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-5">
             {timeline.length > 0 ? (
-              <div className="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#EDE8DF]">
+              <div className="relative pl-6 space-y-5 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#EDE8DF]">
                 {timeline.slice(0, 3).map((event) => (
                   <div key={event.id} className="relative">
-                    <div className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-[#2A6F6F] ring-4 ring-white" />
+                    <div className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-[#174E4A] ring-4 ring-white" />
                     <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
-                      <span className="text-xs font-bold text-[#173737]">{event.title}</span>
-                      <span className="text-[11px] text-[#657777]">{formatDate(event.created_at)}</span>
+                      <span className="text-xs font-bold text-[#263735]">{event.title}</span>
+                      <span className="text-[11px] text-[#627472]">{formatDate(event.created_at)}</span>
                     </div>
-                    <p className="text-xs text-[#657777] mt-1">{event.description}</p>
+                    <p className="text-xs text-[#627472] mt-1">{event.description}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-[#657777] text-center py-4">No events recorded yet.</p>
+              <p className="text-xs text-[#627472] text-center py-4">No events recorded yet.</p>
             )}
           </CardContent>
         </Card>
 
-        {/* Clinical Disclaimer footer */}
+        {/* Clinical Disclaimer */}
         <Disclaimer variant="card" />
       </div>
     </AppShell>

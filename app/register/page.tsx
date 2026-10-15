@@ -5,7 +5,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { HeartPulse, Eye, EyeOff, Lock, Mail, User, CheckCircle2, AlertCircle, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  HeartPulse,
+  Eye,
+  EyeOff,
+  Lock,
+  Mail,
+  User,
+  CheckCircle2,
+  AlertCircle,
+  ArrowRight,
+  ArrowLeft,
+  ShieldCheck,
+  Sparkles,
+  ChevronRight,
+} from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -79,42 +93,56 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-[#FAF7F2] p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
-          <Link href="/" className="inline-flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-[#2A6F6F] flex items-center justify-center text-white shadow-sm">
-              <HeartPulse className="w-5 h-5 text-[#8FB996]" />
+    <div className="min-h-screen flex flex-col justify-center items-center bg-[#FAF8F3] p-4 sm:p-6 lg:p-8 antialiased selection:bg-[#DDEBE2]">
+      <div className="w-full max-w-lg space-y-6">
+        {/* Navigation back */}
+        <div className="flex items-center justify-between">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-[#174E4A] hover:underline"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" /> Back to CareWatch Home
+          </Link>
+
+          <Link href="/" className="inline-flex items-center gap-2">
+            <div className="w-8 h-8 rounded-xl bg-[#174E4A] flex items-center justify-center text-white shadow-xs">
+              <HeartPulse className="w-4 h-4 text-[#DDEBE2]" />
             </div>
-            <span className="font-display text-2xl font-bold text-[#173737]">
-              CareWatch<span className="text-[#2A6F6F]">.AI</span>
+            <span className="font-display text-lg font-bold text-[#263735]">
+              CareWatch<span className="text-[#174E4A]">.AI</span>
             </span>
           </Link>
-          <p className="text-sm text-[#657777]">
-            Create a secure account for continuous health journey tracking
+        </div>
+
+        <div className="text-center space-y-1.5">
+          <h1 className="font-display text-3xl font-bold text-[#263735]">
+            Create your account
+          </h1>
+          <p className="text-sm text-[#627472]">
+            Join CareWatch AI to track symptoms, schedule follow-ups, and review your recovery journey.
           </p>
         </div>
 
         <Card className="shadow-md border-[#EDE8DF] bg-white">
-          <CardHeader>
+          <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-xl text-[#173737]">Create Free Account</CardTitle>
-              <span className="text-[11px] font-semibold text-[#2A6F6F] bg-[#EBF3ED] px-2.5 py-1 rounded-full flex items-center gap-1">
+              <CardTitle className="text-xl text-[#263735]">Register Health Account</CardTitle>
+              <span className="text-[11px] font-semibold text-[#174E4A] bg-[#EFF7F1] px-2.5 py-1 rounded-full flex items-center gap-1 border border-[#DDEBE2]">
                 <ShieldCheck className="w-3.5 h-3.5" /> RLS Protected
               </span>
             </div>
-            <CardDescription className="text-xs text-[#657777]">
-              Join CareWatch AI to track your health symptoms, check-ins, and recovery pathways
+            <CardDescription className="text-xs text-[#627472]">
+              All data is privately encrypted and isolated to your authenticated account.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleRegister} className="space-y-4">
               {errorMsg && (
-                <div className="p-3.5 rounded-xl bg-[#FDF0ED] border border-[#E0674B]/30 flex items-start gap-2.5 text-xs text-[#AB371C]">
-                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2.5 text-xs text-red-800">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-red-600" />
                   <div className="space-y-1">
                     <p className="font-semibold">{errorMsg}</p>
-                    <p className="text-[11px] text-[#AB371C]/80">
+                    <p className="text-[11px] text-red-700/80">
                       Need immediate testing? You can use{" "}
                       <Link href="/login" className="underline font-bold">
                         1-Click Demo Login
@@ -126,7 +154,7 @@ export default function RegisterPage() {
               )}
 
               {successMsg && (
-                <div className="p-3.5 rounded-xl bg-[#EBF3ED] border border-[#8FB996]/40 flex items-start gap-2.5 text-xs text-[#24542E]">
+                <div className="p-3.5 rounded-xl bg-[#EFF7F1] border border-[#DDEBE2] flex items-start gap-2.5 text-xs text-[#174E4A]">
                   <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600" />
                   <div className="space-y-1.5">
                     <p className="font-semibold">{successMsg}</p>
@@ -134,7 +162,7 @@ export default function RegisterPage() {
                       <div className="pt-1">
                         <Link href="/login">
                           <Button size="sm" variant="outline" type="button" className="text-xs bg-white">
-                            Go to Sign In / Demo Login <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                            Proceed to Sign In / Demo Login <ArrowRight className="w-3.5 h-3.5 ml-1" />
                           </Button>
                         </Link>
                       </div>
@@ -144,11 +172,11 @@ export default function RegisterPage() {
               )}
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#173737] block">
+                <label className="text-xs font-semibold text-[#263735] block">
                   Full Name
                 </label>
                 <div className="relative">
-                  <User className="w-4 h-4 text-[#657777] absolute left-3.5 top-3" />
+                  <User className="w-4 h-4 text-[#627472] absolute left-3.5 top-3" />
                   <input
                     type="text"
                     required
@@ -156,17 +184,17 @@ export default function RegisterPage() {
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Sarah Jenkins"
                     disabled={loading}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#EDE8DF] text-sm text-[#173737] bg-white focus:outline-none focus:ring-2 focus:ring-[#2A6F6F]/40 disabled:opacity-50"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#EDE8DF] text-sm text-[#263735] bg-white focus:outline-none focus:ring-2 focus:ring-[#174E4A]/30 disabled:opacity-50"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#173737] block">
+                <label className="text-xs font-semibold text-[#263735] block">
                   Email Address
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-[#657777] absolute left-3.5 top-3" />
+                  <Mail className="w-4 h-4 text-[#627472] absolute left-3.5 top-3" />
                   <input
                     type="email"
                     required
@@ -174,31 +202,31 @@ export default function RegisterPage() {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     disabled={loading}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#EDE8DF] text-sm text-[#173737] bg-white focus:outline-none focus:ring-2 focus:ring-[#2A6F6F]/40 disabled:opacity-50"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#EDE8DF] text-sm text-[#263735] bg-white focus:outline-none focus:ring-2 focus:ring-[#174E4A]/30 disabled:opacity-50"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#173737] block">
+                <label className="text-xs font-semibold text-[#263735] block">
                   Password (min 8 characters)
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-[#657777] absolute left-3.5 top-3" />
+                  <Lock className="w-4 h-4 text-[#627472] absolute left-3.5 top-3" />
                   <input
                     type={showPassword ? "text" : "password"}
                     required
                     minLength={8}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Create a strong password"
+                    placeholder="Create account password"
                     disabled={loading}
-                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-[#EDE8DF] text-sm text-[#173737] bg-white focus:outline-none focus:ring-2 focus:ring-[#2A6F6F]/40 disabled:opacity-50"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-[#EDE8DF] text-sm text-[#263735] bg-white focus:outline-none focus:ring-2 focus:ring-[#174E4A]/30 disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3 text-[#657777] hover:text-[#173737]"
+                    className="absolute right-3.5 top-3 text-[#627472] hover:text-[#263735]"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -207,25 +235,25 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-[#173737] block">
+                <label className="text-xs font-semibold text-[#263735] block">
                   Confirm Password
                 </label>
                 <div className="relative">
-                  <Lock className="w-4 h-4 text-[#657777] absolute left-3.5 top-3" />
+                  <Lock className="w-4 h-4 text-[#627472] absolute left-3.5 top-3" />
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     required
                     minLength={8}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-enter your password"
+                    placeholder="Re-enter account password"
                     disabled={loading}
-                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-[#EDE8DF] text-sm text-[#173737] bg-white focus:outline-none focus:ring-2 focus:ring-[#2A6F6F]/40 disabled:opacity-50"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-[#EDE8DF] text-sm text-[#263735] bg-white focus:outline-none focus:ring-2 focus:ring-[#174E4A]/30 disabled:opacity-50"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3.5 top-3 text-[#657777] hover:text-[#173737]"
+                    className="absolute right-3.5 top-3 text-[#627472] hover:text-[#263735]"
                     tabIndex={-1}
                   >
                     {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -233,18 +261,18 @@ export default function RegisterPage() {
                 </div>
               </div>
 
-              {/* Clinical safety terms acknowledgment */}
-              <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#EDE8DF] flex items-start gap-2.5 text-xs text-[#657777]">
+              {/* Safety terms */}
+              <div className="p-3.5 rounded-xl bg-[#FAF8F3] border border-[#EDE8DF] flex items-start gap-2.5 text-xs text-[#627472]">
                 <input
                   type="checkbox"
                   id="safety_terms"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}
                   disabled={loading}
-                  className="mt-0.5 rounded text-[#2A6F6F] focus:ring-[#2A6F6F]"
+                  className="mt-0.5 rounded text-[#174E4A] focus:ring-[#174E4A]"
                 />
                 <label htmlFor="safety_terms" className="cursor-pointer leading-relaxed">
-                  I understand that CareWatch AI is a health tracking and supportive navigation platform. It does <strong>not</strong> provide medical diagnoses, replace clinical consultations, or prescribe medication. In an emergency, I agree to call emergency services (e.g. 911/999) immediately.
+                  I understand that CareWatch AI is a supportive navigation platform, not a doctor or diagnostic engine. I agree to seek immediate emergency care (911/999/112) for critical symptoms.
                 </label>
               </div>
 
@@ -259,17 +287,17 @@ export default function RegisterPage() {
               </Button>
             </form>
 
-            <div className="mt-6 pt-5 border-t border-[#F4EFEB] flex flex-col items-center gap-3 text-xs text-[#657777]">
+            <div className="mt-6 pt-5 border-t border-[#EDE8DF] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#627472]">
               <div>
                 Already registered?{" "}
-                <Link href="/login" className="text-[#2A6F6F] font-semibold hover:underline">
+                <Link href="/login" className="text-[#174E4A] font-bold hover:underline">
                   Sign in here
                 </Link>
               </div>
-              <div className="text-[11px] text-[#657777]/80 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-[#2A6F6F]" />
-                Looking to evaluate features? Use 1-Click Demo on the Sign In page.
-              </div>
+
+              <Link href="/" className="hover:text-[#174E4A] hover:underline flex items-center gap-1">
+                Return to homepage <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
             </div>
           </CardContent>
         </Card>

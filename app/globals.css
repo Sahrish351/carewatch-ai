@@ -1,57 +1,65 @@
 @import "tailwindcss";
 
 @theme {
-  --color-teal-50: #f0f7f7;
-  --color-teal-100: #dceeed;
+  --color-warm-ivory: #faf8f3;
+  --color-clean-white: #ffffff;
+  --color-forest: #174e4a;
+  --color-forest-dark: #103835;
+  --color-forest-light: #236964;
+  --color-fresh-sage: #ddebe2;
+  --color-soft-mint: #eff7f1;
+  --color-muted-charcoal: #263735;
+  --color-warm-peach: #f6dfd3;
+  
+  --color-teal-50: #eff7f1;
+  --color-teal-100: #ddebe2;
   --color-teal-200: #bddedc;
   --color-teal-300: #8fc5c2;
   --color-teal-400: #5fa5a2;
-  --color-teal-500: #3e8a86;
-  --color-teal-600: #2a6f6f;
-  --color-teal-700: #225959;
-  --color-teal-800: #1d4848;
-  --color-teal-900: #173737;
+  --color-teal-500: #236964;
+  --color-teal-600: #174e4a;
+  --color-teal-700: #103835;
+  --color-teal-800: #0a2523;
+  --color-teal-900: #061716;
 
-  --color-sage-50: #f4f8f5;
-  --color-sage-100: #e5f0e7;
-  --color-sage-200: #cce2d1;
-  --color-sage-300: #a8ceb0;
+  --color-sage-50: #f7faf8;
+  --color-sage-100: #eff7f1;
+  --color-sage-200: #ddebe2;
+  --color-sage-300: #b8d7c4;
   --color-sage-400: #8fb996;
   --color-sage-500: #6ca075;
   --color-sage-600: #52815a;
   --color-sage-700: #426748;
 
-  --color-urgent-50: #fef3f0;
-  --color-urgent-100: #fde5e0;
-  --color-urgent-200: #facfc5;
-  --color-urgent-300: #f4a999;
-  --color-urgent-400: #eb7c64;
-  --color-urgent-500: #e0674b;
-  --color-urgent-600: #cb4628;
-  --color-urgent-700: #ab371c;
+  --color-urgent-50: #fef2f2;
+  --color-urgent-100: #fee2e2;
+  --color-urgent-200: #fecaca;
+  --color-urgent-500: #ef4444;
+  --color-urgent-600: #dc2626;
+  --color-urgent-700: #b91c1c;
 
-  --color-warm-bg: #faf7f2;
+  --color-warm-bg: #faf8f3;
   --color-warm-surface: #ffffff;
   --color-warm-border: #ede8df;
-  --color-warm-muted: #657777;
-  --color-warm-dark: #173737;
+  --color-warm-muted: #627472;
+  --color-warm-dark: #263735;
 
   --font-serif: var(--font-fraunces), Georgia, serif;
   --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
 }
 
 :root {
-  --background: #faf7f2;
-  --foreground: #173737;
-  --primary: #2a6f6f;
+  --background: #faf8f3;
+  --foreground: #263735;
+  --primary: #174e4a;
   --primary-foreground: #ffffff;
-  --secondary: #8fb996;
-  --secondary-foreground: #173737;
-  --muted: #657777;
-  --accent-urgent: #e0674b;
-  --border: #e6e0d5;
+  --secondary: #ddebe2;
+  --secondary-foreground: #174e4a;
+  --muted: #627472;
+  --accent-urgent: #dc2626;
+  --border: #ede8df;
   --card: #ffffff;
-  --card-foreground: #173737;
+  --card-foreground: #263735;
 }
 
 body {

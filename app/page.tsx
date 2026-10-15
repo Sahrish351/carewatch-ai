@@ -35,7 +35,13 @@ import {
   Stethoscope,
   ChevronDown,
   ChevronUp,
+  FileText,
+  Languages,
+  Calendar,
+  Check,
+  BookOpen,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -44,7 +50,7 @@ export default function LandingPage() {
   const faqs = [
     {
       q: "What is CareWatch AI and how is it different from a symptom checker?",
-      a: "Most symptom checkers give you a single probability list and disappear. CareWatch AI creates a continuous health journey: it understands your initial symptoms, provides an evidence-informed action plan, schedules an automated follow-up check-in, compares your new symptoms against your baseline, and reassesses your care pathway if symptoms worsen.",
+      a: "Most symptom checkers give you a single list of conditions and disappear. CareWatch AI creates a continuous health journey: it understands your concern, provides an evidence-informed action plan, schedules an automated follow-up check-in, compares your new symptoms against your baseline, and reassesses your care pathway if symptoms worsen.",
     },
     {
       q: "Is CareWatch AI a replacement for a licensed doctor?",
@@ -65,57 +71,58 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF7F2] text-[#173737] selection:bg-[#8FB996]/30">
+    <div className="min-h-screen flex flex-col bg-[#FAF8F3] text-[#263735] selection:bg-[#DDEBE2] antialiased">
+      {/* SECTION A — NAVIGATION */}
       <PublicNav />
 
-      {/* 1. HERO SECTION */}
+      {/* SECTION B — HERO */}
       <section className="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Column: Core Positioning */}
+            {/* Left Messaging */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               className="lg:col-span-7 space-y-6"
             >
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EBF3ED] border border-[#8FB996]/40 text-[#24542E] text-xs font-semibold">
-                <Sparkles className="w-3.5 h-3.5 text-[#2A6F6F]" />
-                <span>Next-Generation Healthcare Navigation & Follow-Up</span>
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF7F1] border border-[#DDEBE2] text-[#174E4A] text-xs font-bold">
+                <Sparkles className="w-3.5 h-3.5 text-[#174E4A]" />
+                <span>Next-Generation Healthcare Navigation & Recovery Safety Net</span>
               </div>
 
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#173737] leading-[1.12]">
+              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#263735] leading-[1.12]">
                 Your Health Journey,{" "}
-                <span className="text-[#2A6F6F] underline decoration-[#8FB996]/50 underline-offset-8">
+                <span className="text-[#174E4A] underline decoration-[#DDEBE2] underline-offset-8">
                   Followed Through.
                 </span>
               </h1>
 
-              <p className="text-lg sm:text-xl text-[#657777] max-w-2xl leading-relaxed font-normal">
-                CareWatch AI helps you understand a health concern, take an evidence-informed next step, and automatically checks back later to see whether your condition improved or changed.
+              <p className="text-lg sm:text-xl text-[#627472] max-w-2xl leading-relaxed font-normal">
+                Understand your health concerns, keep track of changes, and receive structured follow-up support throughout your recovery journey.
               </p>
 
               {/* CTAs */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
                 <Link href="/assessment/new">
-                  <Button size="lg" className="w-full sm:w-auto text-base shadow-md">
-                    Start Your Health Journey <ArrowRight className="w-5 h-5 ml-1.5" />
+                  <Button size="lg" className="w-full sm:w-auto text-sm font-bold bg-[#174E4A] hover:bg-[#103835] text-white shadow-md">
+                    Start Your Health Journey <ArrowRight className="w-4 h-4 ml-1.5" />
                   </Button>
                 </Link>
                 <Link href="#how-it-works">
-                  <Button variant="outline" size="lg" className="w-full sm:w-auto text-base">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto text-sm font-semibold">
                     Explore How It Works
                   </Button>
                 </Link>
               </div>
 
-              {/* Clinical safety micro-notice */}
+              {/* Medical safety notice */}
               <div className="pt-2">
                 <Disclaimer variant="inline" />
               </div>
             </motion.div>
 
-            {/* Right Column: Hero Visual with Real Photography & Floating Clinical Badge */}
+            {/* Right Layered Hero Visual */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -125,31 +132,31 @@ export default function LandingPage() {
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-[#EDE8DF] bg-white aspect-[4/3] sm:aspect-[16/11]">
                 <Image
                   src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80"
-                  alt="Doctor discussing digital health assessment with patient"
+                  alt="Doctor consulting with patient reviewing health tracking tablet"
                   fill
                   priority
                   className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 500px"
+                  sizes="(max-width: 768px) 100vw, 520px"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#173737]/80 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#174E4A]/80 via-transparent to-transparent" />
 
-                {/* Overlaid Floating Recovery Indicator */}
+                {/* Overlaid Recovery Timeline Badge */}
                 <div className="absolute bottom-4 left-4 right-4 p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-[#EDE8DF] shadow-lg">
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="font-bold text-[#173737] flex items-center gap-1.5">
+                    <span className="font-bold text-[#263735] flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                       Active Care Episode
                     </span>
-                    <span className="text-[10px] font-semibold text-[#2A6F6F] bg-[#EBF3ED] px-2 py-0.5 rounded">
+                    <span className="text-[10px] font-semibold text-[#174E4A] bg-[#EFF7F1] px-2 py-0.5 rounded border border-[#DDEBE2]">
                       Step 3: Follow-Up
                     </span>
                   </div>
-                  <div className="text-xs text-[#657777] flex items-center justify-between">
+                  <div className="text-xs text-[#627472] flex items-center justify-between">
                     <span>Headache Check-in: <strong>24h Window</strong></span>
                     <span className="text-amber-800 font-bold">Severity: 4/10 $\to$ 7/10</span>
                   </div>
                   <div className="mt-2 w-full bg-[#EDE8DF] h-1.5 rounded-full overflow-hidden">
-                    <div className="bg-[#2A6F6F] h-full rounded-full w-3/4" />
+                    <div className="bg-[#174E4A] h-full rounded-full w-3/4" />
                   </div>
                 </div>
               </div>
@@ -158,169 +165,151 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 2. TRUST AND SAFETY STRIP */}
+      {/* TRUST STRIP */}
       <section className="border-y border-[#EDE8DF] bg-white py-6 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-around gap-6 text-xs text-[#657777]">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-around gap-6 text-xs text-[#627472]">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#2A6F6F]" />
-            <span className="font-semibold text-[#173737]">Row-Level Security (RLS)</span> Protected
+            <ShieldCheck className="w-4 h-4 text-[#174E4A]" />
+            <span className="font-semibold text-[#263735]">Row-Level Security (RLS)</span> Protected
           </div>
           <div className="flex items-center gap-2">
-            <Lock className="w-4 h-4 text-[#2A6F6F]" />
-            <span>Private User-Scoped Records</span>
+            <Lock className="w-4 h-4 text-[#174E4A]" />
+            <span>Encrypted User-Scoped Database</span>
           </div>
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#2A6F6F]" />
+            <Sparkles className="w-4 h-4 text-[#174E4A]" />
             <span>Multi-Agent Gemini 3.8 Flash Engine</span>
           </div>
           <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-[#2A6F6F]" />
+            <Clock className="w-4 h-4 text-[#174E4A]" />
             <span>Continuous Recovery Safety Net</span>
           </div>
         </div>
       </section>
 
-      {/* 3. THE PROBLEM SECTION */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#FAF7F2]">
+      {/* SECTION C — THE PROBLEM */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#FAF8F3]">
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="text-center max-w-2xl mx-auto space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#2A6F6F]">
-              The Healthcare Disconnect
+            <span className="text-xs font-bold uppercase tracking-wider text-[#174E4A]">
+              The Care Gap
             </span>
-            <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#173737]">
+            <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#263735]">
               Why ordinary symptom checkers leave you stranded
             </h2>
-            <p className="text-sm text-[#657777] leading-relaxed">
-              When people feel unwell, they search symptoms online, get an alarming list of diagnoses, and are left with no ongoing safety net or structured follow-up.
+            <p className="text-sm text-[#627472] leading-relaxed">
+              When people feel unwell, searching symptoms online often yields an alarming list of conditions without any ongoing safety net or structured follow-up.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* The Old Way */}
-            <div className="p-8 rounded-3xl bg-white border border-[#EDE8DF] space-y-5">
-              <div className="w-10 h-10 rounded-xl bg-red-50 text-red-700 flex items-center justify-center font-bold">
-                <AlertCircle className="w-5 h-5" />
-              </div>
-              <h3 className="text-xl font-bold text-[#173737]">
-                Traditional One-Off Checkers
-              </h3>
-              <ul className="space-y-3 text-xs text-[#657777] leading-relaxed">
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500 font-bold shrink-0">✕</span>
-                  <span>Give you a generic probability list, then immediately disappear.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500 font-bold shrink-0">✕</span>
-                  <span>Never check back tomorrow to see if you improved, stayed the same, or got worse.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500 font-bold shrink-0">✕</span>
-                  <span>No persistent timeline to compare today&apos;s symptoms against last week.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-500 font-bold shrink-0">✕</span>
-                  <span>Cause anxiety without offering actionable, evidence-informed next steps.</span>
-                </li>
-              </ul>
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
+            {/* Editorial Image */}
+            <div className="md:col-span-5 relative rounded-3xl overflow-hidden shadow-lg border border-[#EDE8DF] aspect-square">
+              <Image
+                src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=80"
+                alt="Person checking health application on smartphone"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 450px"
+              />
+              <div className="absolute inset-0 bg-[#174E4A]/10" />
             </div>
 
-            {/* The CareWatch AI Way */}
-            <div className="p-8 rounded-3xl bg-[#EBF3ED]/70 border border-[#8FB996]/50 space-y-5 shadow-xs">
-              <div className="w-10 h-10 rounded-xl bg-[#2A6F6F] text-white flex items-center justify-center font-bold">
-                <HeartPulse className="w-5 h-5 text-[#8FB996]" />
+            {/* Comparison Text Block */}
+            <div className="md:col-span-7 space-y-6">
+              <div className="p-6 rounded-2xl bg-white border border-[#EDE8DF] space-y-3">
+                <div className="flex items-center gap-2.5 text-red-700 font-bold text-sm">
+                  <div className="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center">
+                    <AlertCircle className="w-4 h-4" />
+                  </div>
+                  <span>Traditional Symptom Checkers</span>
+                </div>
+                <p className="text-xs text-[#627472] leading-relaxed">
+                  They output a terrifying probability list and close the tab. You are left alone to remember whether your symptoms worsened tomorrow, with no baseline comparison or proactive safety check.
+                </p>
               </div>
-              <h3 className="text-xl font-bold text-[#173737]">
-                The CareWatch Continuous Loop
-              </h3>
-              <ul className="space-y-3 text-xs text-[#24542E] leading-relaxed">
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>Understand:</strong> Listens to your concern and asks focused, adaptive clinical questions.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>Action Plan:</strong> Generates a tailored self-care and monitoring plan grounded in published clinical guidelines.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>Check In:</strong> Proactively prompts you at 12, 24, or 48 hours to report changes.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span><strong>Compare & Reassess:</strong> Compares progression against baseline and escalates to a doctor if red flags emerge.</span>
-                </li>
-              </ul>
+
+              <div className="p-6 rounded-2xl bg-[#EFF7F1] border border-[#DDEBE2] space-y-3 shadow-xs">
+                <div className="flex items-center gap-2.5 text-[#174E4A] font-bold text-sm">
+                  <div className="w-7 h-7 rounded-lg bg-[#174E4A] text-white flex items-center justify-center">
+                    <HeartPulse className="w-4 h-4 text-[#DDEBE2]" />
+                  </div>
+                  <span>The CareWatch Recovery Loop</span>
+                </div>
+                <p className="text-xs text-[#263735] leading-relaxed">
+                  CareWatch stays with you throughout your illness. It schedules an automated follow-up window, prompts you to check in, detects when symptoms deteriorate, and updates your care pathway when it matters most.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. HOW CAREWATCH AI WORKS */}
+      {/* SECTION D — HOW IT WORKS */}
       <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8 bg-white border-y border-[#EDE8DF]">
         <div className="max-w-6xl mx-auto space-y-14">
           <div className="text-center max-w-2xl mx-auto space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#2A6F6F]">
-              The Care Navigation Engine
+            <span className="text-xs font-bold uppercase tracking-wider text-[#174E4A]">
+              Care Navigation Engine
             </span>
-            <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#173737]">
-              How the Continuous Recovery Loop Works
+            <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#263735]">
+              ASSESS → PLAN → CHECK IN → COMPARE → REASSESS
             </h2>
-            <p className="text-sm text-[#657777]">
-              Five intelligent steps connected across your health journey:
+            <p className="text-sm text-[#627472]">
+              The core innovation is not simply checking symptoms—it is the continuous recovery loop.
             </p>
           </div>
 
-          {/* 5-Step Connected Timeline */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 relative">
             {[
               {
                 step: "01",
                 title: "Assess Concern",
-                desc: "Describe what is bothering you in plain language. AI extracts symptoms and asks targeted questions.",
+                desc: "Describe what is bothering you. The intake agent extracts symptoms and asks adaptive clinical questions.",
                 icon: Search,
               },
               {
                 step: "02",
                 title: "Triage & Plan",
-                desc: "Receive an urgency assessment (Self-Care, Monitor, See a Doctor, Urgent) with evidence-informed next steps.",
+                desc: "Receive an urgency assessment (Self-Care, Monitor, See a Doctor, Urgent) and an evidence-informed action plan.",
                 icon: ShieldAlert,
               },
               {
                 step: "03",
-                title: "Schedule Check-In",
-                desc: "CareWatch schedules an in-app follow-up checkpoint based on your clinical risk profile.",
+                title: "Check In Later",
+                desc: "CareWatch AI schedules a 12, 24, or 48-hour follow-up checkpoint tailored to your risk level.",
                 icon: Clock,
               },
               {
                 step: "04",
                 title: "Compare Trajectory",
-                desc: "Return to report symptom progression (Better, Same, Worse, or New Symptoms) vs baseline.",
+                desc: "Report your symptoms during check-in. The system evaluates whether you improved, stayed stable, or worsened.",
                 icon: GitCompare,
               },
               {
                 step: "05",
                 title: "Reassess & Escalate",
-                desc: "If symptoms deteriorate, your care pathway automatically upgrades with prompt escalation guidance.",
+                desc: "If new red flags or worsening emerge, your pathway is upgraded with immediate clinical escalation advice.",
                 icon: RefreshCw,
               },
-            ].map((s, idx) => {
+            ].map((s) => {
               const Icon = s.icon;
               return (
                 <div
                   key={s.step}
-                  className="p-5 rounded-2xl bg-[#FAF8F5] border border-[#EDE8DF] space-y-3 flex flex-col justify-between hover:border-[#2A6F6F]/40 transition-colors"
+                  className="p-5 rounded-2xl bg-[#FAF8F3] border border-[#EDE8DF] space-y-3 flex flex-col justify-between hover:border-[#174E4A]/40 transition-colors"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-extrabold text-[#2A6F6F] font-mono">
+                    <span className="text-xs font-extrabold text-[#174E4A] font-mono">
                       {s.step}
                     </span>
-                    <div className="w-8 h-8 rounded-lg bg-white border border-[#EDE8DF] flex items-center justify-center text-[#2A6F6F]">
+                    <div className="w-8 h-8 rounded-xl bg-white border border-[#EDE8DF] flex items-center justify-center text-[#174E4A] shadow-2xs">
                       <Icon className="w-4 h-4" />
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-[#173737] mb-1">{s.title}</h3>
-                    <p className="text-xs text-[#657777] leading-relaxed">{s.desc}</p>
+                    <h3 className="text-sm font-bold text-[#263735] mb-1">{s.title}</h3>
+                    <p className="text-xs text-[#627472] leading-relaxed">{s.desc}</p>
                   </div>
                 </div>
               );
@@ -329,117 +318,135 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 5. CORE FEATURES GRID */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#FAF7F2]">
-        <div className="max-w-6xl mx-auto space-y-12">
+      {/* SECTION E — FEATURE SHOWCASE (Varied Layouts) */}
+      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-[#FAF8F3]">
+        <div className="max-w-6xl mx-auto space-y-14">
           <div className="text-center max-w-2xl mx-auto space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#2A6F6F]">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#174E4A]">
               Comprehensive Care Toolkit
             </span>
-            <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#173737]">
-              Built for Safety, Clarity, and Follow-Through
+            <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#263735]">
+              Designed with Clinical Rigor and Patient Empathy
             </h2>
-            <p className="text-sm text-[#657777]">
-              Everything you need to navigate symptoms with calm confidence.
+            <p className="text-sm text-[#627472]">
+              Every tool is purpose-built to guide, monitor, and empower your health decisions.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              {
-                title: "Adaptive Questioning",
-                desc: "Tailors follow-up questions dynamically to rule out critical red-flag emergency symptoms.",
-                icon: Search,
-                tag: "AI Powered",
-              },
-              {
-                title: "Evidence-Informed Plans",
-                desc: "Grounds home-care steps and warning signs in clinical guidelines from NICE, CDC, and AAFP.",
-                icon: FileCheck2,
-                tag: "Verified Sources",
-              },
-              {
-                title: "Scheduled Check-Ins",
-                desc: "Never forget when to re-evaluate: scheduled safety checks at 12, 24, or 48 hours.",
-                icon: Clock,
-                tag: "Proactive",
-              },
-              {
-                title: "Symptom Comparison",
-                desc: "Visualizes trajectory changes over time, highlighting progression or newly emerging factors.",
-                icon: GitCompare,
-                tag: "Trajectory Analysis",
-              },
-              {
-                title: "Health Passport",
-                desc: "Instant emergency card detailing medications, allergies, and chronic conditions for clinical visits.",
-                icon: HeartPulse,
-                tag: "Emergency Card",
-              },
-              {
-                title: "Recovery Timeline",
-                desc: "Chronological audit trail of health checks, symptom changes, and clinical recommendations.",
-                icon: Compass,
-                tag: "Audit Trail",
-              },
-              {
-                title: "Health Records Vault",
-                desc: "Securely organize past medical discharge notes and diagnostic panels with user-scoped RLS.",
-                icon: Lock,
-                tag: "Private Vault",
-              },
-              {
-                title: "Bilingual English & Roman Urdu",
-                desc: "Accessible interface providing clear health guidance in English and Roman Urdu.",
-                icon: Sparkles,
-                tag: "Accessible",
-              },
-            ].map((f) => {
-              const Icon = f.icon;
-              return (
-                <div
-                  key={f.title}
-                  className="p-6 rounded-2xl bg-white border border-[#EDE8DF] space-y-3 hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-[#EBF3ED] text-[#2A6F6F] flex items-center justify-center">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <span className="text-[10px] font-semibold text-[#2A6F6F] bg-[#EBF3ED] px-2 py-0.5 rounded">
-                      {f.tag}
-                    </span>
-                  </div>
-                  <h3 className="text-sm font-bold text-[#173737]">{f.title}</h3>
-                  <p className="text-xs text-[#657777] leading-relaxed">{f.desc}</p>
+          {/* Varied Showcase Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Feature 1: Adaptive Questioning */}
+            <div className="md:col-span-2 p-8 rounded-3xl bg-white border border-[#EDE8DF] shadow-xs flex flex-col justify-between space-y-6">
+              <div className="space-y-3">
+                <span className="text-[10px] font-bold uppercase text-[#174E4A] bg-[#EFF7F1] px-2.5 py-1 rounded-full border border-[#DDEBE2]">
+                  Intelligent Intake
+                </span>
+                <h3 className="text-2xl font-bold text-[#263735]">
+                  Adaptive Questions to Rule Out Emergencies
+                </h3>
+                <p className="text-xs text-[#627472] leading-relaxed max-w-xl">
+                  Instead of static checklists, CareWatch dynamically tailors questions to rule out sudden onset, neurological deficits, or cardiac indicators before formulating guidance.
+                </p>
+              </div>
+
+              {/* Simulated Interactive Dialog */}
+              <div className="p-4 rounded-2xl bg-[#FAF8F3] border border-[#EDE8DF] space-y-2 text-xs">
+                <div className="p-2.5 rounded-xl bg-white border border-[#EDE8DF] text-[#263735] flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-[#174E4A]" />
+                  <span>&quot;Did the headache occur suddenly like a thunderclap?&quot;</span>
                 </div>
-              );
-            })}
+                <div className="p-2.5 rounded-xl bg-[#EFF7F1] border border-[#DDEBE2] text-[#174E4A] flex items-center justify-between">
+                  <span>Answer: &quot;No, it built up gradually over 2 days.&quot;</span>
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                </div>
+              </div>
+            </div>
+
+            {/* Feature 2: Health Passport */}
+            <div className="p-8 rounded-3xl bg-white border border-[#EDE8DF] shadow-xs space-y-4 flex flex-col justify-between">
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold uppercase text-[#174E4A] bg-[#EFF7F1] px-2.5 py-1 rounded-full border border-[#DDEBE2]">
+                  Emergency Readiness
+                </span>
+                <h3 className="text-xl font-bold text-[#263735]">Personal Health Passport</h3>
+                <p className="text-xs text-[#627472] leading-relaxed">
+                  A compact, accessible summary of your current medications, known allergies, and chronic conditions for in-person clinic visits.
+                </p>
+              </div>
+              <div className="p-4 rounded-2xl bg-[#FAF8F3] border border-[#EDE8DF] text-xs space-y-1.5">
+                <div className="font-bold text-[#263735]">Emergency Summary Card</div>
+                <div className="text-[11px] text-[#627472]">• 2 Active Medications</div>
+                <div className="text-[11px] text-[#627472]">• No Known Drug Allergies</div>
+              </div>
+            </div>
+
+            {/* Feature 3: Evidence Sources */}
+            <div className="p-8 rounded-3xl bg-white border border-[#EDE8DF] shadow-xs space-y-4">
+              <span className="text-[10px] font-bold uppercase text-[#174E4A] bg-[#EFF7F1] px-2.5 py-1 rounded-full border border-[#DDEBE2]">
+                Clinical Integrity
+              </span>
+              <h3 className="text-xl font-bold text-[#263735]">Grounded in Verified Evidence</h3>
+              <p className="text-xs text-[#627472] leading-relaxed">
+                Triage recommendations cite public guidelines from NICE, CDC, AAFP, and WHO with canonical references—never hallucinated medical citations.
+              </p>
+              <div className="pt-2 text-xs font-semibold text-[#174E4A] flex items-center gap-1.5">
+                <BookOpen className="w-4 h-4" /> 5 Curated Guideline Repositories
+              </div>
+            </div>
+
+            {/* Feature 4: Trajectory Comparisons */}
+            <div className="md:col-span-2 p-8 rounded-3xl bg-[#EFF7F1]/80 border border-[#DDEBE2] shadow-xs flex flex-col justify-between space-y-4">
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold uppercase text-[#174E4A] bg-white px-2.5 py-1 rounded-full border border-[#DDEBE2]">
+                  Trajectory Analysis
+                </span>
+                <h3 className="text-2xl font-bold text-[#263735]">
+                  Previous vs Current Symptom Comparisons
+                </h3>
+                <p className="text-xs text-[#263735] leading-relaxed max-w-xl">
+                  CareWatch AI measures changes across severity scores, functional limitations, and newly emerging symptoms to decide whether recovery is on track or requires escalation.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 text-xs">
+                <div className="p-3.5 rounded-2xl bg-white border border-[#DDEBE2]">
+                  <span className="text-[#627472] block text-[10px] uppercase font-bold">Initial Intake</span>
+                  <div className="text-sm font-bold text-[#263735] mt-1">Severity: 4/10</div>
+                  <div className="text-[11px] text-[#174E4A]">Tier: Monitor Closely</div>
+                </div>
+                <div className="p-3.5 rounded-2xl bg-white border border-[#DDEBE2]">
+                  <span className="text-[#627472] block text-[10px] uppercase font-bold">24-Hour Follow-up</span>
+                  <div className="text-sm font-bold text-red-600 mt-1">Severity: 7/10 (+3)</div>
+                  <div className="text-[11px] text-red-700">Tier: See a Doctor Today</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 6. INTERACTIVE RECOVERY JOURNEY PREVIEW */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white border-y border-[#EDE8DF]">
+      {/* SECTION F — RECOVERY JOURNEY PREVIEW */}
+      <section id="recovery-journey" className="py-20 px-4 sm:px-6 lg:px-8 bg-white border-y border-[#EDE8DF]">
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div className="space-y-2 max-w-xl">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#2A6F6F]">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#174E4A]">
                 Illustrative Walkthrough
               </span>
-              <h2 className="font-display text-3xl font-bold text-[#173737]">
+              <h2 className="font-display text-3xl font-bold text-[#263735]">
                 Experience the Follow-Up Loop in Action
               </h2>
-              <p className="text-xs text-[#657777]">
-                See how CareWatch AI handles a real clinical scenario from first symptom intake through scheduled check-in and reassessment.
+              <p className="text-xs text-[#627472]">
+                Walk through an illustrative scenario from first symptom intake through scheduled check-in and reassessment.
               </p>
             </div>
             <div className="text-[11px] font-semibold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full shrink-0">
-              Illustrative Demo Case (Sarah Jenkins)
+              Illustrative example (Fictional case for demonstration)
             </div>
           </div>
 
-          {/* Interactive Step Switcher */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Step Selection Buttons */}
             <div className="lg:col-span-5 space-y-3">
               {[
                 {
@@ -466,36 +473,37 @@ export default function LandingPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`w-full p-4 rounded-2xl text-left border transition-all cursor-pointer ${
+                  className={cn(
+                    "w-full p-4 rounded-2xl text-left border transition-all cursor-pointer",
                     activeTab === tab.id
-                      ? "bg-[#2A6F6F] text-white border-[#2A6F6F] shadow-sm"
-                      : "bg-[#FAF8F5] text-[#173737] border-[#EDE8DF] hover:border-[#2A6F6F]/40"
-                  }`}
+                      ? "bg-[#174E4A] text-white border-[#174E4A] shadow-sm"
+                      : "bg-[#FAF8F3] text-[#263735] border-[#EDE8DF] hover:border-[#174E4A]/40"
+                  )}
                 >
                   <div className="text-xs font-bold">{tab.label}</div>
-                  <div className={`text-[11px] mt-0.5 ${activeTab === tab.id ? "text-white/80" : "text-[#657777]"}`}>
+                  <div className={cn("text-[11px] mt-0.5", activeTab === tab.id ? "text-white/80" : "text-[#627472]")}>
                     {tab.subtitle}
                   </div>
                 </button>
               ))}
             </div>
 
-            {/* Display Card */}
+            {/* Step Display Card */}
             <div className="lg:col-span-7">
               <Card className="border-[#EDE8DF] shadow-md p-6 bg-white min-h-[340px] flex flex-col justify-between">
                 {activeTab === "assess" && (
                   <div className="space-y-4 animate-in fade-in">
                     <div className="flex items-center justify-between border-b border-[#EDE8DF] pb-3">
-                      <span className="text-xs font-bold text-[#173737]">Step 1: Symptom Intake</span>
+                      <span className="text-xs font-bold text-[#263735]">Step 1: Symptom Intake</span>
                       <Badge variant="secondary">Intake Completed</Badge>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#EDE8DF] text-xs">
-                      <span className="text-[#657777] block font-semibold mb-1">Reported Concern:</span>
-                      <p className="font-medium text-[#173737]">&quot;Persistent dull headache behind forehead for 2 days, mild light sensitivity.&quot;</p>
+                    <div className="p-3.5 rounded-xl bg-[#FAF8F3] border border-[#EDE8DF] text-xs">
+                      <span className="text-[#627472] block font-semibold mb-1">Reported Concern:</span>
+                      <p className="font-medium text-[#263735]">&quot;Persistent dull headache behind forehead for 2 days, mild light sensitivity.&quot;</p>
                     </div>
                     <div className="space-y-2 text-xs">
-                      <span className="font-semibold text-[#173737]">Adaptive Clinical Questions Asked:</span>
-                      <div className="p-2.5 rounded-lg bg-[#F0F7F7] text-[#2A6F6F]">
+                      <span className="font-semibold text-[#263735]">Adaptive Questions Asked by Question Agent:</span>
+                      <div className="p-2.5 rounded-xl bg-[#EFF7F1] text-[#174E4A]">
                         Q: &quot;Did this headache develop suddenly like a thunderclap, or gradually?&quot; $\to$ A: &quot;Gradually over 2 days.&quot;
                       </div>
                     </div>
@@ -505,15 +513,15 @@ export default function LandingPage() {
                 {activeTab === "plan" && (
                   <div className="space-y-4 animate-in fade-in">
                     <div className="flex items-center justify-between border-b border-[#EDE8DF] pb-3">
-                      <span className="text-xs font-bold text-[#173737]">Step 2: Urgency Triage & Care Plan</span>
-                      <span className="text-xs font-bold text-[#2A6F6F] bg-[#EBF3ED] px-2.5 py-0.5 rounded">Tier: Monitor Closely</span>
+                      <span className="text-xs font-bold text-[#263735]">Step 2: Urgency Triage & Care Plan</span>
+                      <span className="text-xs font-bold text-[#174E4A] bg-[#EFF7F1] px-2.5 py-0.5 rounded border border-[#DDEBE2]">Tier: Monitor Closely</span>
                     </div>
-                    <p className="text-xs text-[#657777] leading-relaxed">
+                    <p className="text-xs text-[#627472] leading-relaxed">
                       Gradual tension-type presentation with absent red flags. Safe for home monitoring with scheduled follow-up.
                     </p>
-                    <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#EDE8DF] space-y-1.5 text-xs">
-                      <span className="font-bold text-[#173737]">Scheduled Safety Check:</span>
-                      <p className="text-[#657777]">Automated follow-up set for <strong>24 hours</strong>. When to seek care: if sudden weakness or severe vomiting emerges.</p>
+                    <div className="p-3.5 rounded-xl bg-[#FAF8F3] border border-[#EDE8DF] space-y-1.5 text-xs">
+                      <span className="font-bold text-[#263735]">Scheduled Safety Check:</span>
+                      <p className="text-[#627472]">Automated follow-up set for <strong>24 hours</strong>. When to seek care: if sudden weakness or severe vomiting emerges.</p>
                     </div>
                   </div>
                 )}
@@ -521,14 +529,14 @@ export default function LandingPage() {
                 {activeTab === "checkin" && (
                   <div className="space-y-4 animate-in fade-in">
                     <div className="flex items-center justify-between border-b border-[#EDE8DF] pb-3">
-                      <span className="text-xs font-bold text-[#173737]">Step 3: 24-Hour Follow-Up Check-In</span>
+                      <span className="text-xs font-bold text-[#263735]">Step 3: 24-Hour Follow-Up Check-In</span>
                       <span className="text-xs font-bold text-amber-800 bg-amber-100 px-2.5 py-0.5 rounded">Progression: Worse</span>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 text-xs space-y-1.5">
+                    <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs space-y-1.5">
                       <span className="font-bold text-amber-900">Patient Check-in Report:</span>
                       <p className="text-amber-950">Severity increased from <strong>4/10 to 7/10</strong>. Developed new symptom: <strong>intermittent dizziness</strong> on standing.</p>
                     </div>
-                    <p className="text-xs text-[#657777]">
+                    <p className="text-xs text-[#627472]">
                       AI detects significant symptom escalation (+3 severity and new vestibular symptom) triggering automatic reassessment.
                     </p>
                   </div>
@@ -537,15 +545,15 @@ export default function LandingPage() {
                 {activeTab === "reassess" && (
                   <div className="space-y-4 animate-in fade-in">
                     <div className="flex items-center justify-between border-b border-[#EDE8DF] pb-3">
-                      <span className="text-xs font-bold text-[#173737]">Step 4: Reassessment & Pathway Upgrade</span>
-                      <span className="text-xs font-bold text-orange-800 bg-orange-100 px-2.5 py-0.5 rounded">Tier: See a Doctor Today</span>
+                      <span className="text-xs font-bold text-[#263735]">Step 4: Reassessment & Pathway Upgrade</span>
+                      <span className="text-xs font-bold text-red-700 bg-red-100 px-2.5 py-0.5 rounded">Tier: See a Doctor Today</span>
                     </div>
-                    <div className="p-3.5 rounded-xl bg-[#F0F7F7] border border-[#BDDEDC] space-y-2 text-xs">
-                      <span className="font-bold text-[#2A6F6F]">Updated Clinical Recommendation:</span>
-                      <p className="text-[#173737] leading-relaxed">
-                        Due to severity progression and new dizziness, primary care or urgent care review is recommended within the next 8–12 hours for neurological screening and blood pressure evaluation.
+                    <div className="p-3.5 rounded-xl bg-[#EFF7F1] border border-[#DDEBE2] space-y-2 text-xs">
+                      <span className="font-bold text-[#174E4A]">Updated Clinical Recommendation:</span>
+                      <p className="text-[#263735] leading-relaxed">
+                        Due to severity progression and new dizziness, in-person primary or urgent care review is recommended within the next 8–12 hours for neurological screening and blood pressure evaluation.
                       </p>
-                      <div className="text-[11px] text-[#657777] pt-1 border-t border-[#BDDEDC]/50">
+                      <div className="text-[11px] text-[#627472] pt-1 border-t border-[#DDEBE2]">
                         Citation: NICE CG150 Headache Assessment Guidance
                       </div>
                     </div>
@@ -553,9 +561,9 @@ export default function LandingPage() {
                 )}
 
                 <div className="pt-4 border-t border-[#EDE8DF] flex items-center justify-between text-xs">
-                  <span className="text-[#657777]">Ready to test with your own health concern?</span>
+                  <span className="text-[#627472]">Want to evaluate with your own concern?</span>
                   <Link href="/assessment/new">
-                    <Button size="sm">
+                    <Button size="sm" className="bg-[#174E4A] hover:bg-[#103835] text-white">
                       Start Live Assessment <ArrowRight className="w-3.5 h-3.5 ml-1" />
                     </Button>
                   </Link>
@@ -566,73 +574,73 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 7. DASHBOARD PREVIEW */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#FAF7F2]">
+      {/* SECTION G — PRODUCT PREVIEW */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#FAF8F3]">
         <div className="max-w-6xl mx-auto space-y-12">
           <div className="text-center max-w-2xl mx-auto space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#2A6F6F]">
-              Patient Portal Experience
+            <span className="text-xs font-bold uppercase tracking-wider text-[#174E4A]">
+              Interface Experience
             </span>
-            <h2 className="font-display text-3xl font-bold text-[#173737]">
-              A Calm, Reassuring Dashboard for Your Health Journey
+            <h2 className="font-display text-3xl font-bold text-[#263735]">
+              A Calm, Patient-Centered Dashboard
             </h2>
-            <p className="text-sm text-[#657777]">
+            <p className="text-sm text-[#627472]">
               Keep track of active health checks, follow-up countdowns, and your personal Health Passport.
             </p>
           </div>
 
-          <div className="relative rounded-3xl overflow-hidden border border-[#EDE8DF] shadow-2xl bg-white p-6 sm:p-10 space-y-6">
+          <div className="relative rounded-3xl overflow-hidden border border-[#EDE8DF] shadow-xl bg-white p-6 sm:p-10 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EDE8DF] pb-6">
               <div>
-                <span className="text-xs font-semibold text-[#2A6F6F]">Personal Health Safety Net</span>
-                <h3 className="text-2xl font-bold text-[#173737]">Welcome back, Sarah</h3>
-                <p className="text-xs text-[#657777]">CareWatch AI is monitoring your active care journey.</p>
+                <span className="text-xs font-bold text-[#174E4A]">Personal Health Safety Net</span>
+                <h3 className="text-2xl font-bold text-[#263735]">Welcome back, Sarah</h3>
+                <p className="text-xs text-[#627472]">CareWatch AI is monitoring your active care journey.</p>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold bg-[#EBF3ED] text-[#24542E] px-3 py-1 rounded-full">
+                <span className="text-xs font-bold bg-[#EFF7F1] text-[#174E4A] border border-[#DDEBE2] px-3 py-1 rounded-full">
                   Follow-up Check-in Due Now
                 </span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#EDE8DF] space-y-2">
-                <span className="text-[11px] font-bold uppercase text-[#657777]">Current Episode</span>
-                <div className="text-sm font-bold text-[#173737]">Persistent Headache</div>
-                <div className="text-xs text-[#657777]">Reported 24 hours ago. Severity: 4/10</div>
+              <div className="p-4 rounded-2xl bg-[#FAF8F3] border border-[#EDE8DF] space-y-2">
+                <span className="text-[11px] font-bold uppercase text-[#627472]">Current Episode</span>
+                <div className="text-sm font-bold text-[#263735]">Persistent Headache</div>
+                <div className="text-xs text-[#627472]">Reported 24 hours ago. Severity: 4/10</div>
               </div>
-              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
+              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 space-y-2">
                 <span className="text-[11px] font-bold uppercase text-amber-900">Next Action</span>
                 <div className="text-sm font-bold text-amber-950">Complete 24h Check-in</div>
                 <div className="text-xs text-amber-900">Report how your symptoms have progressed</div>
               </div>
-              <div className="p-4 rounded-2xl bg-[#F0F7F7] border border-[#BDDEDC] space-y-2">
-                <span className="text-[11px] font-bold uppercase text-[#2A6F6F]">Health Passport</span>
-                <div className="text-sm font-bold text-[#173737]">Emergency Card Ready</div>
-                <div className="text-xs text-[#657777]">2 active medications, no known drug allergies</div>
+              <div className="p-4 rounded-2xl bg-[#EFF7F1] border border-[#DDEBE2] space-y-2">
+                <span className="text-[11px] font-bold uppercase text-[#174E4A]">Health Passport</span>
+                <div className="text-sm font-bold text-[#263735]">Emergency Card Ready</div>
+                <div className="text-xs text-[#627472]">2 active medications, no known drug allergies</div>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 8. PRIVACY AND HEALTHCARE SAFETY SECTION */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white border-y border-[#EDE8DF]">
+      {/* SECTION H — PRIVACY & EMERGENCY SAFETY */}
+      <section id="safety" className="py-20 px-4 sm:px-6 lg:px-8 bg-white border-y border-[#EDE8DF]">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
           {/* Privacy */}
-          <div className="p-8 rounded-3xl bg-[#FAF8F5] border border-[#EDE8DF] space-y-4">
-            <div className="w-10 h-10 rounded-xl bg-[#2A6F6F] text-white flex items-center justify-center font-bold">
-              <Lock className="w-5 h-5 text-[#8FB996]" />
+          <div className="p-8 rounded-3xl bg-[#FAF8F3] border border-[#EDE8DF] space-y-4">
+            <div className="w-10 h-10 rounded-2xl bg-[#174E4A] text-white flex items-center justify-center font-bold">
+              <Lock className="w-5 h-5 text-[#DDEBE2]" />
             </div>
-            <h3 className="text-xl font-bold text-[#173737]">Strict Privacy & Data Ownership</h3>
-            <p className="text-xs text-[#657777] leading-relaxed">
+            <h3 className="text-xl font-bold text-[#263735]">Strict Privacy & Data Ownership</h3>
+            <p className="text-xs text-[#627472] leading-relaxed">
               Health concerns are deeply personal. CareWatch AI enforces PostgreSQL Row-Level Security (RLS) on all 15 database tables. You own your data: no third-party tracking, no advertising pixels, and no sharing with insurance providers.
             </p>
           </div>
 
           {/* Emergency Safety Protocol */}
-          <div className="p-8 rounded-3xl bg-red-50/50 border border-red-200/80 space-y-4">
-            <div className="w-10 h-10 rounded-xl bg-red-600 text-white flex items-center justify-center font-bold">
+          <div className="p-8 rounded-3xl bg-red-50/60 border border-red-200 space-y-4">
+            <div className="w-10 h-10 rounded-2xl bg-red-600 text-white flex items-center justify-center font-bold">
               <PhoneCall className="w-5 h-5" />
             </div>
             <h3 className="text-xl font-bold text-red-950">Emergency Safety Guardrails</h3>
@@ -643,14 +651,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 9. FAQ ACCORDION SECTION */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#FAF7F2]">
+      {/* SECTION I — FAQ ACCORDION */}
+      <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 bg-[#FAF8F3]">
         <div className="max-w-4xl mx-auto space-y-10">
           <div className="text-center space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#2A6F6F]">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#174E4A]">
               Frequently Asked Questions
             </span>
-            <h2 className="font-display text-3xl font-bold text-[#173737]">
+            <h2 className="font-display text-3xl font-bold text-[#263735]">
               Everything you need to know about CareWatch AI
             </h2>
           </div>
@@ -661,21 +669,21 @@ export default function LandingPage() {
               return (
                 <div
                   key={idx}
-                  className="rounded-2xl border border-[#EDE8DF] bg-white overflow-hidden transition-all"
+                  className="rounded-2xl border border-[#EDE8DF] bg-white overflow-hidden transition-all shadow-2xs"
                 >
                   <button
                     onClick={() => setOpenFaq(isOpen ? null : idx)}
-                    className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm text-[#173737] hover:bg-[#FAF8F5] transition-colors cursor-pointer"
+                    className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm text-[#263735] hover:bg-[#FAF8F3] transition-colors cursor-pointer"
                   >
                     <span>{faq.q}</span>
                     {isOpen ? (
-                      <ChevronUp className="w-4 h-4 text-[#2A6F6F] shrink-0" />
+                      <ChevronUp className="w-4 h-4 text-[#174E4A] shrink-0" />
                     ) : (
-                      <ChevronDown className="w-4 h-4 text-[#657777] shrink-0" />
+                      <ChevronDown className="w-4 h-4 text-[#627472] shrink-0" />
                     )}
                   </button>
                   {isOpen && (
-                    <div className="px-5 pb-5 text-xs text-[#657777] leading-relaxed border-t border-[#F4EFEB] pt-3">
+                    <div className="px-5 pb-5 text-xs text-[#627472] leading-relaxed border-t border-[#EDE8DF] pt-3">
                       {faq.a}
                     </div>
                   )}
@@ -686,15 +694,15 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 10. FINAL CTA SECTION */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#2A6F6F] text-white">
+      {/* SECTION J — FINAL CTA AND FOOTER */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#174E4A] text-white">
         <div className="max-w-4xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white text-xs font-semibold">
-            <Sparkles className="w-3.5 h-3.5 text-[#8FB996]" />
-            <span>Start Today with Zero Commitment</span>
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/10 text-white text-xs font-bold">
+            <Sparkles className="w-3.5 h-3.5 text-[#DDEBE2]" />
+            <span>Continuous Health Support</span>
           </div>
 
-          <h2 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
             Understand today. Check in tomorrow. Act when it matters.
           </h2>
 
@@ -704,12 +712,12 @@ export default function LandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link href="/assessment/new">
-              <Button size="lg" className="bg-white text-[#2A6F6F] hover:bg-[#FAF8F5] shadow-lg text-sm font-bold">
+              <Button size="lg" className="bg-white text-[#174E4A] hover:bg-[#FAF8F3] shadow-lg text-sm font-bold">
                 Start a Free Health Check <ArrowRight className="w-4 h-4 ml-1.5" />
               </Button>
             </Link>
             <Link href="/login">
-              <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 text-sm">
+              <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 text-sm font-semibold">
                 Sign In / 1-Click Demo
               </Button>
             </Link>
