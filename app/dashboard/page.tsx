@@ -23,31 +23,49 @@ import {
   Sparkles,
   Activity,
   ChevronRight,
+  Stethoscope,
+  ShieldCheck,
+  TrendingUp,
+  HeartPulse,
 } from "lucide-react";
 import type { Assessment, FollowUp, TimelineEvent, ActionPlan, RiskAssessment } from "@/types/database";
 
 export default function DashboardPage() {
+  const [user, setUser] = useState<{ id: string; name: string; email: string; role: string; isDemo?: boolean } | null>(null);
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [followUps, setFollowUps] = useState<FollowUp[]>([]);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [actionPlans, setActionPlans] = useState<ActionPlan[]>([]);
   const [riskAssessment, setRiskAssessment] = useState<RiskAssessment | undefined>();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load state from healthStore
-    const userAssessments = healthStore.getAssessments();
-    const userFollowUps = healthStore.getFollowUps();
-    const userTimeline = healthStore.getTimelineEvents();
-    const userPlans = healthStore.getAllActionPlans();
+    // 1. Fetch current user session
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setUser(data.user);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        // 2. Load health data
+        const userAssessments = healthStore.getAssessments();
+        const userFollowUps = healthStore.getFollowUps();
+        const userTimeline = healthStore.getTimelineEvents();
+        const userPlans = healthStore.getAllActionPlans();
 
-    setAssessments(userAssessments);
-    setFollowUps(userFollowUps);
-    setTimeline(userTimeline);
-    setActionPlans(userPlans);
+        setAssessments(userAssessments);
+        setFollowUps(userFollowUps);
+        setTimeline(userTimeline);
+        setActionPlans(userPlans);
 
-    if (userAssessments.length > 0) {
-      setRiskAssessment(healthStore.getRiskAssessment(userAssessments[0].id));
-    }
+        if (userAssessments.length > 0) {
+          setRiskAssessment(healthStore.getRiskAssessment(userAssessments[0].id));
+        }
+        setLoading(false);
+      });
   }, []);
 
   const activeAssessment = assessments.find((a) => a.status !== "resolved");
@@ -55,19 +73,49 @@ export default function DashboardPage() {
 
   return (
     <AppShell>
-      <div className="space-y-8">
+      <div className="space-y-8 max-w-6xl mx-auto">
+        {/* Role Portal Alert if Clinician or Admin logged in */}
+        {user && (user.role === "clinician" || user.role === "admin") && (
+          <div className="p-3.5 rounded-2xl bg-[#E0F2FE] border border-[#0284C7]/30 flex items-center justify-between text-xs text-[#0369A1]">
+            <div className="flex items-center gap-2">
+              <Stethoscope className="w-4 h-4 text-[#0284C7]" />
+              <span>
+                You are viewing the Citizen Patient interface as <strong>{user.name}</strong> ({user.role.toUpperCase()}).
+              </span>
+            </div>
+            <Link href={user.role === "admin" ? "/admin" : "/clinician"}>
+              <Button size="sm" className="h-7 text-xs bg-[#0284C7] hover:bg-[#0369A1] text-white">
+                Go to {user.role === "admin" ? "Admin Console" : "Clinician Triage"} <ArrowRight className="w-3 h-3 ml-1" />
+              </Button>
+            </Link>
+          </div>
+        )}
+
+        {/* Demo Data Notice if in demo mode */}
+        {user?.isDemo && (
+          <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-xs text-amber-900 flex items-center justify-between">
+            <span className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <strong>Demonstration Mode:</strong> Illustrative patient journey loaded for testing the complete follow-up and reassessment loop.
+            </span>
+            <span className="text-[11px] font-semibold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+              Sample Case: Sarah Jenkins
+            </span>
+          </div>
+        )}
+
         {/* Welcome Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2A6F6F] bg-[#EBF3ED] px-3 py-1 rounded-full mb-2">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Personal Recovery Assistant</span>
+              <HeartPulse className="w-3.5 h-3.5 text-[#2A6F6F]" />
+              <span>Personal Health Safety Net</span>
             </div>
             <h1 className="font-display text-3xl font-bold text-[#173737]">
-              Good day, Dr. Sarah
+              Welcome back, {user?.name || "Patient"}
             </h1>
             <p className="text-sm text-[#657777]">
-              How are you feeling today? CareWatch is monitoring your continuous care journey.
+              CareWatch AI is monitoring your symptom progression and scheduled safety checks.
             </p>
           </div>
 
@@ -255,50 +303,42 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Recent Timeline Feed */}
+        {/* Timeline Events Snippet */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-lg">Recent Care Activity</CardTitle>
-              <CardDescription>Chronological events from your active assessments and follow-ups</CardDescription>
+              <CardTitle className="text-lg">Recent Health Timeline</CardTitle>
+              <CardDescription>
+                Chronological record of your reported symptoms, AI recommendations, and check-ins
+              </CardDescription>
             </div>
-            <Link href="/timeline">
-              <Button variant="ghost" size="sm" className="text-xs">
-                Full Timeline <ArrowRight className="w-3.5 h-3.5 ml-1" />
-              </Button>
+            <Link href="/timeline" className="text-xs text-[#2A6F6F] font-semibold hover:underline flex items-center gap-1">
+              Full Timeline <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {timeline.slice(0, 3).map((event) => (
-              <div
-                key={event.id}
-                className="flex items-start gap-4 p-3.5 rounded-xl bg-[#FAF8F5] border border-[#EDE8DF]"
-              >
-                <div className="w-8 h-8 rounded-lg bg-[#2A6F6F]/10 text-[#2A6F6F] flex items-center justify-center shrink-0 mt-0.5">
-                  <Activity className="w-4 h-4" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-sm font-bold text-[#173737] truncate">
-                      {event.title}
-                    </span>
-                    <span className="text-[11px] text-[#657777] shrink-0">
-                      {formatDate(event.created_at)}
-                    </span>
+          <CardContent>
+            {timeline.length > 0 ? (
+              <div className="relative pl-6 space-y-6 before:content-[''] before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#EDE8DF]">
+                {timeline.slice(0, 3).map((event) => (
+                  <div key={event.id} className="relative">
+                    <div className="absolute -left-6 top-1 w-2.5 h-2.5 rounded-full bg-[#2A6F6F] ring-4 ring-white" />
+                    <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+                      <span className="text-xs font-bold text-[#173737]">{event.title}</span>
+                      <span className="text-[11px] text-[#657777]">{formatDate(event.created_at)}</span>
+                    </div>
+                    <p className="text-xs text-[#657777] mt-1">{event.description}</p>
                   </div>
-                  <p className="text-xs text-[#657777] mt-0.5">
-                    {event.description}
-                  </p>
-                </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <p className="text-xs text-[#657777] text-center py-4">No events recorded yet.</p>
+            )}
           </CardContent>
         </Card>
 
-        {/* Global Disclaimer */}
-        <Disclaimer />
+        {/* Clinical Disclaimer footer */}
+        <Disclaimer variant="card" />
       </div>
     </AppShell>
   );
 }
-

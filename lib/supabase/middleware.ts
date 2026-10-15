@@ -9,49 +9,90 @@ export async function updateSession(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // If Supabase credentials are not configured, allow local demo session cookie
-  if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes("demo.")) {
-    const isProtected = isProtectedRoute(request.nextUrl.pathname);
-    const hasDemoAuth = request.cookies.get("carewatch_auth_token")?.value;
+  let activeUser: any = null;
+  let userRole = "citizen";
 
-    if (isProtected && !hasDemoAuth) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      url.searchParams.set("redirect", request.nextUrl.pathname);
-      return NextResponse.redirect(url);
+  // 1. Try real Supabase session if configured
+  if (supabaseUrl && supabaseAnonKey && !supabaseUrl.includes("demo.")) {
+    try {
+      const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value }) =>
+              request.cookies.set(name, value)
+            );
+            supabaseResponse = NextResponse.next({
+              request,
+            });
+            cookiesToSet.forEach(({ name, value, options }) =>
+              supabaseResponse.cookies.set(name, value, options)
+            );
+          },
+        },
+      });
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        activeUser = user;
+        userRole = user.user_metadata?.role || "citizen";
+      }
+    } catch {
+      // Fall through to cookie checks
     }
-    return supabaseResponse;
   }
 
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) =>
-          request.cookies.set(name, value)
-        );
-        supabaseResponse = NextResponse.next({
-          request,
-        });
-        cookiesToSet.forEach(({ name, value, options }) =>
-          supabaseResponse.cookies.set(name, value, options)
-        );
-      },
-    },
-  });
+  // 2. Check for active demo session cookie if no real Supabase user
+  if (!activeUser) {
+    const demoCookie = request.cookies.get("carewatch_session")?.value;
+    if (demoCookie) {
+      try {
+        const parsed = JSON.parse(decodeURIComponent(demoCookie));
+        activeUser = parsed;
+        userRole = parsed.role || "citizen";
+      } catch {}
+    }
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    if (!activeUser) {
+      const legacyToken = request.cookies.get("carewatch_auth_token")?.value;
+      if (legacyToken) {
+        activeUser = {
+          id: "demo-user-citizen",
+          email: "patient@carewatch.ai",
+          name: "Sarah Jenkins",
+          role: "citizen",
+        };
+        userRole = "citizen";
+      }
+    }
+  }
 
-  const isProtected = isProtectedRoute(request.nextUrl.pathname);
+  const pathname = request.nextUrl.pathname;
+  const isProtected = isProtectedRoute(pathname);
 
-  if (isProtected && !user) {
+  // 3. Block unauthorized access to protected routes
+  if (isProtected && !activeUser) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("redirect", request.nextUrl.pathname);
+    url.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(url);
+  }
+
+  // 4. Role-based enforcement
+  if (pathname.startsWith("/admin") && userRole !== "admin") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
+  if (pathname.startsWith("/clinician") && userRole !== "clinician" && userRole !== "admin") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
@@ -69,7 +110,8 @@ function isProtectedRoute(pathname: string): boolean {
     "/health-passport",
     "/documents",
     "/settings",
+    "/admin",
+    "/clinician",
   ];
   return protectedPrefixes.some((prefix) => pathname.startsWith(prefix));
 }
-

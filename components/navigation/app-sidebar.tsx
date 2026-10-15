@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -16,9 +16,20 @@ import {
   Settings,
   HeartPulse,
   LogOut,
+  Stethoscope,
+  ShieldCheck,
+  User,
 } from "lucide-react";
 
-const navigationItems = [
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: "citizen" | "clinician" | "admin";
+  isDemo?: boolean;
+}
+
+const baseNavigationItems = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "New Health Check", href: "/assessment/new", icon: PlusCircle, highlight: true },
   { name: "My Journeys", href: "/journeys", icon: Compass },
@@ -32,10 +43,29 @@ const navigationItems = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const [user, setUser] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setUser(data.user);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const handleLogout = async () => {
-    await fetch("/api/auth/demo-login", { method: "DELETE" });
+    await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login";
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return "CW";
+    const parts = name.trim().split(" ");
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return name.slice(0, 2).toUpperCase();
   };
 
   return (
@@ -60,7 +90,7 @@ export function AppSidebar() {
 
         {/* Navigation Links */}
         <nav className="p-4 space-y-1.5">
-          {navigationItems.map((item) => {
+          {baseNavigationItems.map((item) => {
             const Icon = item.icon;
             const isActive =
               pathname === item.href ||
@@ -84,19 +114,69 @@ export function AppSidebar() {
               </Link>
             );
           })}
+
+          {/* Clinician Portal Link */}
+          {(user?.role === "clinician" || user?.role === "admin" || user?.isDemo) && (
+            <div className="pt-3 border-t border-[#EDE8DF] my-2">
+              <span className="px-3.5 text-[10px] uppercase font-bold text-[#657777] tracking-wider block mb-1">
+                Clinical Management
+              </span>
+              <Link
+                href="/clinician"
+                className={cn(
+                  "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all",
+                  pathname.startsWith("/clinician")
+                    ? "bg-[#0284C7] text-white shadow-xs"
+                    : "text-[#173737] hover:bg-[#F0F9FF] hover:text-[#0284C7]"
+                )}
+              >
+                <Stethoscope className="w-4 h-4 text-[#0284C7]" />
+                <span>Clinician Triage</span>
+              </Link>
+
+              {(user?.role === "admin" || user?.isDemo) && (
+                <Link
+                  href="/admin"
+                  className={cn(
+                    "flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all mt-1",
+                    pathname.startsWith("/admin")
+                      ? "bg-[#D97706] text-white shadow-xs"
+                      : "text-[#173737] hover:bg-[#FFFBEB] hover:text-[#D97706]"
+                  )}
+                >
+                  <ShieldCheck className="w-4 h-4 text-[#D97706]" />
+                  <span>Admin Console</span>
+                </Link>
+              )}
+            </div>
+          )}
         </nav>
       </div>
 
-      {/* User / Bottom info */}
+      {/* User Footer Profile */}
       <div className="p-4 border-t border-[#EDE8DF]">
         <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#EDE8DF] mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5 overflow-hidden">
             <div className="w-8 h-8 rounded-full bg-[#2A6F6F]/10 text-[#2A6F6F] font-bold text-xs flex items-center justify-center shrink-0">
-              SK
+              {getInitials(user?.name)}
             </div>
             <div className="truncate">
-              <div className="text-xs font-semibold text-[#173737] truncate">Dr. Sarah Khan</div>
-              <div className="text-[10px] text-[#657777] truncate">Demo Patient Profile</div>
+              <div className="text-xs font-semibold text-[#173737] truncate">
+                {user?.name || "Patient Session"}
+              </div>
+              <div className="text-[10px] text-[#657777] truncate capitalize flex items-center gap-1">
+                <span
+                  className={cn(
+                    "inline-block w-1.5 h-1.5 rounded-full",
+                    user?.role === "admin"
+                      ? "bg-amber-500"
+                      : user?.role === "clinician"
+                      ? "bg-sky-500"
+                      : "bg-emerald-500"
+                  )}
+                />
+                {user?.isDemo ? `Demo ${user.role}` : user?.role || "Citizen User"}
+              </div>
             </div>
           </div>
         </div>
@@ -111,4 +191,3 @@ export function AppSidebar() {
     </aside>
   );
 }
-
