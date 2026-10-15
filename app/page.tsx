@@ -123,7 +123,7 @@ export default function LandingPage() {
                     Start Your Health Journey <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </Link>
-                <Link href="#how-it-works">
+                <Link href="/how-it-works">
                   <Button
                     variant="outline"
                     size="lg"
@@ -198,10 +198,11 @@ export default function LandingPage() {
                 {/* Clinician Photo in Rounded Frame */}
                 <div className="relative rounded-[28px] overflow-hidden aspect-[4/4.2] sm:aspect-[4/4.5] shadow-inner bg-[#EAE3D2]">
                   <Image
-                    src="https://images.unsplash.com/photo-1594824813583-05990f77242d?auto=format&fit=crop&w=1200&q=80"
+                    src="/images/clinician-female.jpg"
                     alt="Caring clinician in healthcare clinic ready for patient consultation"
                     fill
                     priority
+                    unoptimized
                     className="object-cover object-top"
                     sizes="(max-width: 768px) 100vw, 500px"
                   />
@@ -313,9 +314,10 @@ export default function LandingPage() {
             {/* Editorial Image with Rounded Accent */}
             <div className="md:col-span-5 relative rounded-3xl overflow-hidden shadow-lg border border-[#EDE8DF] aspect-square">
               <Image
-                src="https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=80"
+                src="/images/patient-phone.jpg"
                 alt="Patient reviewing health questions on phone"
                 fill
+                unoptimized
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 450px"
               />

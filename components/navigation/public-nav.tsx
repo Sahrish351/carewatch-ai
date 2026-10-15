@@ -9,11 +9,11 @@ export function PublicNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const links = [
-    { label: "How It Works", href: "/#how-it-works" },
-    { label: "Features", href: "/#features" },
-    { label: "Recovery Journey", href: "/#recovery-journey" },
-    { label: "Safety", href: "/#safety" },
-    { label: "FAQ", href: "/#faq" },
+    { label: "How It Works", href: "/how-it-works" },
+    { label: "Features", href: "/features" },
+    { label: "Recovery Journey", href: "/recovery-journey" },
+    { label: "Safety", href: "/safety" },
+    { label: "FAQ", href: "/faq" },
   ];
 
   return (

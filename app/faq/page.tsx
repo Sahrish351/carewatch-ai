@@ -1,16 +1,28 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
 import { PublicNav } from "@/components/navigation/public-nav";
 import { PublicFooter } from "@/components/navigation/public-footer";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, HelpCircle } from "lucide-react";
+import {
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function FAQPage() {
+  const [openIdx, setOpenIdx] = useState<number | null>(0);
+
   const faqs = [
     {
-      q: "What is CareWatch AI?",
-      a: "CareWatch AI is an AI-powered health navigation and recovery-tracking platform. It helps you understand the urgency of a health concern, provides an evidence-informed next-step action plan, and checks back later to see if your condition improved or changed.",
+      q: "What is CareWatch AI and how is it different from a symptom checker?",
+      a: "Most symptom checkers give you a single list of conditions and disappear. CareWatch AI creates a continuous health journey: it understands your concern, provides an evidence-informed action plan, schedules an automated follow-up check-in, compares your new symptoms against your baseline, and reassesses your care pathway if symptoms worsen.",
     },
     {
       q: "Does CareWatch AI diagnose illnesses?",
@@ -21,58 +33,90 @@ export default function FAQPage() {
       a: "No. We never prescribe medications or alter prescribed regimens. All medical prescriptions require in-person consultation with a licensed healthcare physician.",
     },
     {
-      q: "How does the follow-up loop work?",
-      a: "After you complete an assessment, CareWatch schedules an in-app follow-up (usually in 12 to 48 hours depending on your symptoms). When due, you complete a 30-second check-in. If your symptoms worsen or new symptoms appear, a Reassessment is automatically triggered.",
+      q: "How does the automated follow-up check-in work?",
+      a: "Based on the urgency and nature of your initial assessment, CareWatch AI schedules a personalized follow-up window (e.g. 12, 24, or 48 hours). When the check-in is due, the system prompts you to report your current severity and any new symptoms. It calculates trajectory delta and flags deterioration automatically.",
     },
     {
-      q: "Is my health information private?",
-      a: "Yes. All health data is protected by Supabase PostgreSQL Row Level Security (RLS) policies. Only you have access to your personal assessments, action plans, and check-ins.",
+      q: "Can clinicians and administrators use CareWatch AI?",
+      a: "Yes. CareWatch AI is built with dedicated role-specific workspaces: Patients manage their recovery episodes and Health Passport; Clinicians access a priority triage queue with red-flag escalation alerts; Administrators monitor AI model latency (Gemini 3.8 Flash), database health, and safety audit logs.",
     },
     {
-      q: "Can I use CareWatch in Roman Urdu?",
-      a: "Yes. CareWatch supports Roman Urdu, enabling Urdu-speaking users to describe their symptoms naturally (e.g. 'Sar mein 3 din se dard hai aur chakkar aa rahe hain') and receive guidance.",
+      q: "How is my personal health data protected?",
+      a: "Your data is stored in a dedicated Supabase PostgreSQL database protected by strict Row-Level Security (RLS). Only your authenticated account can read or write your assessments, follow-ups, and health records. We never sell your data, use third-party advertising trackers, or share records without your explicit consent.",
+    },
+    {
+      q: "Can I track multiple health journeys over time?",
+      a: "Yes. Every health concern you start is preserved as an episode in your private health timeline. You can review past check-ins, symptom trend graphs, action plans, and access your personal Health Passport.",
+    },
+    {
+      q: "Can I use CareWatch AI in Roman Urdu?",
+      a: "Yes. CareWatch supports Roman Urdu, enabling Urdu-speaking users to describe their symptoms naturally (e.g. 'Sar mein 3 din se dard hai aur chakkar aa rahe hain') and receive structured clinical triage guidance.",
     },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF7F2] text-[#173737]">
+    <div className="min-h-screen flex flex-col bg-[#FAF8F3] text-[#263735] selection:bg-[#DDEBE2] antialiased">
       <PublicNav />
 
-      <main className="flex-1 py-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full space-y-12">
+      <main className="flex-1 py-16 md:py-24 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full space-y-12">
         <div className="text-center space-y-4">
-          <Badge variant="default">Frequently Asked Questions</Badge>
-          <h1 className="font-display text-4xl sm:text-5xl font-bold text-[#173737]">
-            CareWatch AI Knowledge Base
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EFF7F1] border border-[#DDEBE2] text-[#174E4A] text-xs font-bold">
+            <Sparkles className="w-3.5 h-3.5 text-[#174E4A]" />
+            <span>CareWatch Knowledge Base</span>
+          </div>
+
+          <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight text-[#263735] leading-tight">
+            Frequently Asked Questions
           </h1>
-          <p className="text-base sm:text-lg text-[#657777] max-w-2xl mx-auto leading-relaxed">
-            Everything you need to know about our technology, clinical safety principles, and follow-up system.
+          <p className="text-base sm:text-lg text-[#627472] max-w-2xl mx-auto leading-relaxed">
+            Everything you need to know about our technology, clinical safety principles, and continuous follow-up system.
           </p>
         </div>
 
-        <div className="space-y-4">
-          {faqs.map((faq, i) => (
-            <div key={i} className="p-6 rounded-2xl bg-white border border-[#EDE8DF] space-y-2 shadow-xs">
-              <h3 className="font-display text-lg font-bold text-[#173737] flex items-center gap-2">
-                <HelpCircle className="w-4 h-4 text-[#2A6F6F]" />
-                {faq.q}
-              </h3>
-              <p className="text-sm text-[#657777] leading-relaxed pl-6">
-                {faq.a}
-              </p>
-            </div>
-          ))}
+        <div className="space-y-3">
+          {faqs.map((faq, idx) => {
+            const isOpen = openIdx === idx;
+            return (
+              <div
+                key={idx}
+                className="rounded-2xl border border-[#EDE8DF] bg-white overflow-hidden transition-all shadow-2xs"
+              >
+                <button
+                  onClick={() => setOpenIdx(isOpen ? null : idx)}
+                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-sm text-[#263735] hover:bg-[#FAF8F3] transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <HelpCircle className="w-4 h-4 text-[#174E4A] shrink-0" />
+                    <span>{faq.q}</span>
+                  </span>
+                  {isOpen ? (
+                    <ChevronUp className="w-4 h-4 text-[#174E4A] shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-[#627472] shrink-0" />
+                  )}
+                </button>
+                {isOpen && (
+                  <div className="px-5 pb-5 text-xs text-[#627472] leading-relaxed border-t border-[#EDE8DF] pt-3 pl-11">
+                    {faq.a}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
 
-        <div className="p-8 rounded-3xl bg-[#F0F7F7] border border-[#BDDEDC] text-center space-y-4">
-          <h2 className="font-display text-2xl font-bold text-[#173737]">Still have questions?</h2>
-          <p className="text-sm text-[#657777] max-w-md mx-auto">
-            Test the live platform now or start a guided health assessment to see how it works in real-time.
+        <div className="p-8 rounded-3xl bg-[#174E4A] text-white text-center space-y-4 shadow-md">
+          <h2 className="font-display text-2xl font-bold">Still have questions?</h2>
+          <p className="text-white/80 text-xs sm:text-sm max-w-md mx-auto">
+            Experience the continuous care loop yourself with a free, confidential health check.
           </p>
-          <Link href="/assessment/new">
-            <Button size="lg" className="mt-2">
-              Start a Health Check <ArrowRight className="w-4 h-4 ml-1.5" />
-            </Button>
-          </Link>
+          <div className="pt-2">
+            <Link href="/assessment/new">
+              <Button size="lg" className="bg-white text-[#174E4A] hover:bg-[#FAF8F3] text-xs font-bold">
+                Start Live Assessment <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </main>
 
@@ -80,4 +124,3 @@ export default function FAQPage() {
     </div>
   );
 }
-
