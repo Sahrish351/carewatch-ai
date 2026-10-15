@@ -1,26 +1,91 @@
 @import "tailwindcss";
 
+@theme {
+  --color-teal-50: #f0f7f7;
+  --color-teal-100: #dceeed;
+  --color-teal-200: #bddedc;
+  --color-teal-300: #8fc5c2;
+  --color-teal-400: #5fa5a2;
+  --color-teal-500: #3e8a86;
+  --color-teal-600: #2a6f6f;
+  --color-teal-700: #225959;
+  --color-teal-800: #1d4848;
+  --color-teal-900: #173737;
+
+  --color-sage-50: #f4f8f5;
+  --color-sage-100: #e5f0e7;
+  --color-sage-200: #cce2d1;
+  --color-sage-300: #a8ceb0;
+  --color-sage-400: #8fb996;
+  --color-sage-500: #6ca075;
+  --color-sage-600: #52815a;
+  --color-sage-700: #426748;
+
+  --color-urgent-50: #fef3f0;
+  --color-urgent-100: #fde5e0;
+  --color-urgent-200: #facfc5;
+  --color-urgent-300: #f4a999;
+  --color-urgent-400: #eb7c64;
+  --color-urgent-500: #e0674b;
+  --color-urgent-600: #cb4628;
+  --color-urgent-700: #ab371c;
+
+  --color-warm-bg: #faf7f2;
+  --color-warm-surface: #ffffff;
+  --color-warm-border: #ede8df;
+  --color-warm-muted: #657777;
+  --color-warm-dark: #173737;
+
+  --font-serif: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #faf7f2;
+  --foreground: #173737;
+  --primary: #2a6f6f;
+  --primary-foreground: #ffffff;
+  --secondary: #8fb996;
+  --secondary-foreground: #173737;
+  --muted: #657777;
+  --accent-urgent: #e0674b;
+  --border: #e6e0d5;
+  --card: #ffffff;
+  --card-foreground: #173737;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-serif);
+}
+
+/* Custom scrollbar for healthcare calm UI */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1ede5;
+}
+::-webkit-scrollbar-thumb {
+  background: #c9c3b6;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #9d9687;
+}
+
+@keyframes pulseSubtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-pulse-subtle {
+  animation: pulseSubtle 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
