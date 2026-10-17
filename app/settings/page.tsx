@@ -20,13 +20,24 @@ import {
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const [name, setName] = useState("Dr. Sarah Khan");
+  const [user, setUser] = useState<{ id: string; name: string; email: string; role: string } | null>(null);
+  const [name, setName] = useState("Patient");
   const [language, setLanguage] = useState<"en" | "ur_roman">("en");
   const [timezone, setTimezone] = useState("UTC+05:00 (PKT / Asia/Karachi)");
   const [notifications, setNotifications] = useState(true);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated && data.user) {
+          setUser(data.user);
+          setName(data.user.name || "Patient");
+        }
+      })
+      .catch(() => {});
+
     const pref = healthStore.getPreferences();
     setLanguage(pref.language);
     setTimezone(pref.timezone || "UTC+05:00 (PKT / Asia/Karachi)");
@@ -45,7 +56,7 @@ export default function SettingsPage() {
   };
 
   const handleLogout = async () => {
-    await fetch("/api/auth/demo-login", { method: "DELETE" });
+    await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login";
   };
 
@@ -85,6 +96,17 @@ export default function SettingsPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="w-full p-2.5 rounded-lg border border-[#EDE8DF] text-xs bg-white focus:outline-none focus:ring-2 focus:ring-[#2A6F6F]/40"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-[#173737] block">
+                  Email Address
+                </label>
+                <input
+                  type="text"
+                  disabled
+                  value={user?.email || "patient@carewatch.ai"}
+                  className="w-full p-2.5 rounded-lg border border-[#EDE8DF] text-xs bg-[#FAF8F3] text-[#657777] cursor-not-allowed"
                 />
               </div>
             </CardContent>

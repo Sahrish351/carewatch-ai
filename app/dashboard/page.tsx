@@ -377,43 +377,93 @@ export default function DashboardPage() {
         )}
 
         {/* Symptom Trajectory Comparison Section */}
-        <Card className="border-[#EDE8DF] shadow-xs">
-          <CardHeader className="pb-3 border-b border-[#EDE8DF] flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="text-base text-[#263735] flex items-center gap-2">
-                <GitCompare className="w-4 h-4 text-[#174E4A]" />
-                Symptom Trajectory Analysis
-              </CardTitle>
-              <CardDescription className="text-xs text-[#627472]">
-                Comparing initial intake severity against follow-up check-in scores
-              </CardDescription>
-            </div>
-            <Link href="/timeline" className="text-xs text-[#174E4A] font-bold hover:underline flex items-center gap-1">
-              View Detailed Timeline <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </CardHeader>
-          <CardContent className="p-5">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="p-4 rounded-2xl bg-[#FAF8F3] border border-[#EDE8DF]">
-                <span className="text-[10px] font-bold uppercase text-[#627472] block">Baseline Severity</span>
-                <div className="text-2xl font-bold text-[#263735] mt-1">4 / 10</div>
-                <div className="text-[11px] text-[#627472] mt-0.5">Recorded at initial assessment</div>
+        {activeAssessment && (
+          <Card className="border-[#EDE8DF] shadow-xs">
+            <CardHeader className="pb-3 border-b border-[#EDE8DF] flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base text-[#263735] flex items-center gap-2">
+                  <GitCompare className="w-4 h-4 text-[#174E4A]" />
+                  Symptom Trajectory Analysis
+                </CardTitle>
+                <CardDescription className="text-xs text-[#627472]">
+                  Tracking baseline severity against active check-in progression for &quot;{activeAssessment.title}&quot;
+                </CardDescription>
               </div>
+              <Link href="/timeline" className="text-xs text-[#174E4A] font-bold hover:underline flex items-center gap-1">
+                View Detailed Timeline <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </CardHeader>
+            <CardContent className="p-5">
+              {(() => {
+                const activeSymptoms = healthStore.getSymptoms(activeAssessment.id);
+                const baselineSeverity = activeSymptoms[0]?.severity ?? 5;
+                const activeFollowUp = followUps.find((f) => f.assessment_id === activeAssessment.id);
+                const activeResponse = activeFollowUp
+                  ? healthStore.getFollowUpResponses().find((r) => r.follow_up_id === activeFollowUp.id)
+                  : undefined;
+                const diff = activeResponse ? activeResponse.severity - baselineSeverity : 0;
 
-              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200">
-                <span className="text-[10px] font-bold uppercase text-amber-900 block">Check-in Severity</span>
-                <div className="text-2xl font-bold text-amber-950 mt-1">7 / 10</div>
-                <div className="text-[11px] text-amber-800 mt-0.5">+3 escalation (New dizziness)</div>
-              </div>
+                return (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="p-4 rounded-2xl bg-[#FAF8F3] border border-[#EDE8DF]">
+                      <span className="text-[10px] font-bold uppercase text-[#627472] block">Baseline Severity</span>
+                      <div className="text-2xl font-bold text-[#263735] mt-1">{baselineSeverity} / 10</div>
+                      <div className="text-[11px] text-[#627472] mt-0.5">Recorded at initial assessment</div>
+                    </div>
 
-              <div className="p-4 rounded-2xl bg-[#EFF7F1] border border-[#DDEBE2]">
-                <span className="text-[10px] font-bold uppercase text-[#174E4A] block">Care Pathway Status</span>
-                <div className="text-sm font-bold text-[#174E4A] mt-2">See a Doctor Today</div>
-                <div className="text-[11px] text-[#627472] mt-0.5">Reassessment triggered</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                    <div className={cn(
+                      "p-4 rounded-2xl border",
+                      activeResponse
+                        ? diff > 0
+                          ? "bg-amber-50 border-amber-200"
+                          : "bg-emerald-50 border-emerald-200"
+                        : "bg-[#FAF8F3] border-[#EDE8DF]"
+                    )}>
+                      <span className={cn(
+                        "text-[10px] font-bold uppercase block",
+                        activeResponse && diff > 0 ? "text-amber-900" : "text-[#627472]"
+                      )}>
+                        Check-in Severity
+                      </span>
+                      <div className={cn(
+                        "text-2xl font-bold mt-1",
+                        activeResponse && diff > 0 ? "text-amber-950" : "text-[#263735]"
+                      )}>
+                        {activeResponse ? `${activeResponse.severity} / 10` : "Pending"}
+                      </div>
+                      <div className={cn(
+                        "text-[11px] mt-0.5",
+                        activeResponse && diff > 0 ? "text-amber-800" : "text-[#627472]"
+                      )}>
+                        {activeResponse
+                          ? `${diff > 0 ? `+${diff} escalation` : diff < 0 ? `${diff} improvement` : "Stable"} (${activeResponse.outcome.replace("_", " ")})`
+                          : `Scheduled in ${riskAssessment?.follow_up_hours || 24} hours`}
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[#EFF7F1] border border-[#DDEBE2]">
+                      <span className="text-[10px] font-bold uppercase text-[#174E4A] block">Care Pathway Status</span>
+                      <div className="text-sm font-bold text-[#174E4A] mt-2">
+                        {riskAssessment
+                          ? riskAssessment.tier === "urgent"
+                            ? "Urgent Medical Care"
+                            : riskAssessment.tier === "see-a-doctor"
+                            ? "In-Person Clinic Evaluation"
+                            : riskAssessment.tier === "monitor"
+                            ? "Structured 24h Monitoring"
+                            : "Supportive Self-Care"
+                          : "Active Recovery"}
+                      </div>
+                      <div className="text-[11px] text-[#627472] mt-0.5 line-clamp-1">
+                        {riskAssessment?.recommended_next_step || "Monitoring symptoms"}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Timeline Events Snippet */}
         <Card className="border-[#EDE8DF] shadow-xs">

@@ -3,9 +3,18 @@ import { generateStructuredAI } from "../gemini-client";
 import type { TriageTier } from "@/types/database";
 
 export const ExplanationSchema = z.object({
-  why_recommendation: z.array(z.string()).describe("3-4 concise observable facts directly provided by the user that led to this tier"),
-  what_is_uncertain: z.array(z.string()).describe("Crucial clinical unknowns, e.g. lack of physical exam, vital signs"),
-  what_could_change_this: z.array(z.string()).describe("Specific shifts or new symptoms that would trigger immediate reassessment or escalation"),
+  why_recommendation: z
+    .union([z.array(z.string()), z.string()])
+    .transform((v) => (typeof v === "string" ? [v] : v))
+    .default([]),
+  what_is_uncertain: z
+    .union([z.array(z.string()), z.string()])
+    .transform((v) => (typeof v === "string" ? [v] : v))
+    .default([]),
+  what_could_change_this: z
+    .union([z.array(z.string()), z.string()])
+    .transform((v) => (typeof v === "string" ? [v] : v))
+    .default([]),
 });
 export type ExplanationResult = z.infer<typeof ExplanationSchema>;
 

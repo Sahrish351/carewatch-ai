@@ -333,11 +333,16 @@ class LocalHealthStore {
 
   // API Methods
   public getAssessments(userId: string = DEMO_USER_ID): Assessment[] {
-    if (!userId || userId === DEMO_USER_ID) {
-      return this.assessments;
+    // If the user has created their own real assessments, prioritize and show their real assessments
+    const realUserAssessments = this.assessments.filter((a) => a.id !== "assessment-demo-headache");
+    if (realUserAssessments.length > 0) {
+      if (userId && userId !== DEMO_USER_ID) {
+        const userSpecific = realUserAssessments.filter((a) => a.user_id === userId);
+        if (userSpecific.length > 0) return userSpecific;
+      }
+      return realUserAssessments;
     }
-    const filtered = this.assessments.filter((a) => a.user_id === userId);
-    return filtered.length > 0 ? filtered : this.assessments;
+    return this.assessments;
   }
 
   public getAssessmentById(id: string): Assessment | undefined {
@@ -474,7 +479,8 @@ class LocalHealthStore {
   }
 
   public getAllActionPlans(userId: string = DEMO_USER_ID): ActionPlan[] {
-    return this.actionPlans;
+    const currentAssessmentIds = new Set(this.getAssessments(userId).map((a) => a.id));
+    return this.actionPlans.filter((p) => currentAssessmentIds.has(p.assessment_id));
   }
 
   public scheduleFollowUp(params: {
@@ -506,11 +512,16 @@ class LocalHealthStore {
   }
 
   public getFollowUps(userId: string = DEMO_USER_ID): FollowUp[] {
-    return this.followUps;
+    const currentAssessmentIds = new Set(this.getAssessments(userId).map((a) => a.id));
+    return this.followUps.filter((f) => currentAssessmentIds.has(f.assessment_id));
   }
 
   public getFollowUpById(id: string): FollowUp | undefined {
     return this.followUps.find((f) => f.id === id);
+  }
+
+  public getFollowUpResponses(): FollowUpResponse[] {
+    return this.followUpResponses;
   }
 
   public completeFollowUp(params: {
@@ -604,7 +615,8 @@ class LocalHealthStore {
   }
 
   public getTimelineEvents(userId: string = DEMO_USER_ID): TimelineEvent[] {
-    return this.timelineEvents.filter((e) => e.user_id === userId);
+    const currentAssessmentIds = new Set(this.getAssessments(userId).map((a) => a.id));
+    return this.timelineEvents.filter((e) => currentAssessmentIds.has(e.assessment_id) || e.user_id === userId);
   }
 
   public getHealthPassport(userId: string = DEMO_USER_ID): HealthPassport {
