@@ -121,14 +121,11 @@ export default function LandingPage() {
                 <span>Next-Generation Healthcare Navigation & Recovery Safety Net</span>
               </motion.div>
 
-              {/* Exact Requested Headline */}
-              <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight text-[#263735] leading-[1.08]">
-                Your Health Journey{" "}
-                <span className="relative inline-block text-[#174E4A]">
-                  Deserves Follow-Through.
-                  <svg className="absolute -bottom-2 left-0 w-full h-3 text-[#A3D9C9] -z-10" viewBox="0 0 100 12" preserveAspectRatio="none">
-                    <path d="M0,8 Q50,0 100,8" stroke="currentColor" strokeWidth="6" fill="none" strokeLinecap="round" />
-                  </svg>
+              {/* Responsive Elegant Headline */}
+              <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-[52px] xl:text-6xl font-extrabold tracking-tight text-[#263735] leading-[1.12]">
+                Your Health Journey
+                <span className="block mt-1 sm:mt-2 text-[#174E4A]">
+                  Deserves <span className="inline-block">Follow-Through.</span>
                 </span>
               </h1>
 
@@ -259,41 +256,6 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Floating Badge 1: Top-Left Next Check-in Card (with Subtle Float Motion) */}
-                <motion.div
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute -top-3 -left-3 sm:-top-4 sm:-left-4 p-3.5 rounded-2xl bg-white/95 backdrop-blur-md border border-[#EDE8DF] shadow-xl text-xs space-y-1 max-w-[220px] hidden sm:block"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-xl bg-[#EFF7F1] flex items-center justify-center text-[#174E4A] shadow-2xs">
-                      <Clock className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="font-bold text-[#263735] text-[11px] block">Follow-Up Armed</span>
-                      <span className="text-[10px] text-emerald-600 font-semibold">In 14h 22m</span>
-                    </div>
-                  </div>
-                  <p className="text-[10px] text-[#627472] leading-tight pt-0.5">
-                    Automated check-in prompts patient to measure pain delta.
-                  </p>
-                </motion.div>
-
-                {/* Floating Badge 2: Top-Right Clinician Verified Pill */}
-                <motion.div
-                  animate={{ y: [0, 6, 0] }}
-                  transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-                  className="absolute top-6 -right-3 sm:-right-4 p-3 rounded-2xl bg-gradient-to-br from-[#174E4A] to-[#103835] text-white shadow-xl text-xs space-y-1 max-w-[190px] hidden sm:block"
-                >
-                  <div className="flex items-center gap-1.5 font-bold text-[11px]">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#A3D9C9]" />
-                    <span>NICE & CDC Grounded</span>
-                  </div>
-                  <p className="text-[10px] text-white/80 leading-tight">
-                    Evidence-informed guidance with canonical clinical citations.
-                  </p>
-                </motion.div>
               </div>
             </motion.div>
 
