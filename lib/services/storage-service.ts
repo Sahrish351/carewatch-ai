@@ -62,6 +62,124 @@ class LocalHealthStore {
 
   constructor() {
     this.seedDemoScenario();
+    this.loadFromLocalStorage();
+  }
+
+  private isBrowser(): boolean {
+    return typeof window !== "undefined" && typeof localStorage !== "undefined";
+  }
+
+  public saveToLocalStorage() {
+    if (!this.isBrowser()) return;
+    try {
+      const payload = {
+        assessments: this.assessments,
+        symptoms: this.symptoms,
+        answers: this.answers,
+        agentEvents: this.agentEvents,
+        riskAssessments: this.riskAssessments,
+        actionPlans: this.actionPlans,
+        followUps: this.followUps,
+        followUpResponses: this.followUpResponses,
+        reassessments: this.reassessments,
+        timelineEvents: this.timelineEvents,
+      };
+      localStorage.setItem("carewatch_health_store_v1", JSON.stringify(payload));
+    } catch {
+      // Storage quota or private browsing fallback
+    }
+  }
+
+  public loadFromLocalStorage() {
+    if (!this.isBrowser()) return;
+    try {
+      const raw = localStorage.getItem("carewatch_health_store_v1");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed.assessments && Array.isArray(parsed.assessments) && parsed.assessments.length > 0) {
+          this.assessments = parsed.assessments;
+          if (parsed.symptoms) this.symptoms = parsed.symptoms;
+          if (parsed.answers) this.answers = parsed.answers;
+          if (parsed.agentEvents) this.agentEvents = parsed.agentEvents;
+          if (parsed.riskAssessments) this.riskAssessments = parsed.riskAssessments;
+          if (parsed.actionPlans) this.actionPlans = parsed.actionPlans;
+          if (parsed.followUps) this.followUps = parsed.followUps;
+          if (parsed.followUpResponses) this.followUpResponses = parsed.followUpResponses;
+          if (parsed.reassessments) this.reassessments = parsed.reassessments;
+          if (parsed.timelineEvents) this.timelineEvents = parsed.timelineEvents;
+        }
+      }
+    } catch {
+      // Ignore
+    }
+  }
+
+  public clearLocalStorage() {
+    if (this.isBrowser()) {
+      try {
+        localStorage.removeItem("carewatch_health_store_v1");
+      } catch {}
+    }
+  }
+
+  public syncFromServer(serverData: {
+    assessments?: Assessment[];
+    riskAssessments?: RiskAssessment[];
+    actionPlans?: ActionPlan[];
+    followUps?: FollowUp[];
+    timelineEvents?: TimelineEvent[];
+  }) {
+    if (serverData.assessments && serverData.assessments.length > 0) {
+      const map = new Map<string, Assessment>();
+      // Keep server ones first, then local ones
+      serverData.assessments.forEach((a) => map.set(a.id, a));
+      this.assessments.forEach((a) => {
+        if (!map.has(a.id)) map.set(a.id, a);
+      });
+      this.assessments = Array.from(map.values()).sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    }
+
+    if (serverData.riskAssessments) {
+      const rMap = new Map<string, RiskAssessment>();
+      serverData.riskAssessments.forEach((r) => rMap.set(r.assessment_id, r));
+      this.riskAssessments.forEach((r) => {
+        if (!rMap.has(r.assessment_id)) rMap.set(r.assessment_id, r);
+      });
+      this.riskAssessments = Array.from(rMap.values());
+    }
+
+    if (serverData.actionPlans) {
+      const pMap = new Map<string, ActionPlan>();
+      serverData.actionPlans.forEach((p) => pMap.set(p.assessment_id, p));
+      this.actionPlans.forEach((p) => {
+        if (!pMap.has(p.assessment_id)) pMap.set(p.assessment_id, p);
+      });
+      this.actionPlans = Array.from(pMap.values());
+    }
+
+    if (serverData.followUps) {
+      const fMap = new Map<string, FollowUp>();
+      serverData.followUps.forEach((f) => fMap.set(f.id, f));
+      this.followUps.forEach((f) => {
+        if (!fMap.has(f.id)) fMap.set(f.id, f);
+      });
+      this.followUps = Array.from(fMap.values());
+    }
+
+    if (serverData.timelineEvents) {
+      const tMap = new Map<string, TimelineEvent>();
+      serverData.timelineEvents.forEach((t) => tMap.set(t.id, t));
+      this.timelineEvents.forEach((t) => {
+        if (!tMap.has(t.id)) tMap.set(t.id, t);
+      });
+      this.timelineEvents = Array.from(tMap.values()).sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    }
+
+    this.saveToLocalStorage();
   }
 
   // Pre-seed demo scenario for the 3-minute hackathon demo:
@@ -215,7 +333,11 @@ class LocalHealthStore {
 
   // API Methods
   public getAssessments(userId: string = DEMO_USER_ID): Assessment[] {
-    return this.assessments.filter((a) => a.user_id === userId);
+    if (!userId || userId === DEMO_USER_ID) {
+      return this.assessments;
+    }
+    const filtered = this.assessments.filter((a) => a.user_id === userId);
+    return filtered.length > 0 ? filtered : this.assessments;
   }
 
   public getAssessmentById(id: string): Assessment | undefined {
@@ -248,6 +370,7 @@ class LocalHealthStore {
       description: `Reported concern: "${newAssessment.primary_concern}"`,
     });
 
+    this.saveToLocalStorage();
     return newAssessment;
   }
 
@@ -259,6 +382,7 @@ class LocalHealthStore {
       if (status === "completed" || status === "monitoring") {
         a.completed_at = new Date().toISOString();
       }
+      this.saveToLocalStorage();
     }
   }
 
@@ -274,6 +398,7 @@ class LocalHealthStore {
         created_at: new Date().toISOString(),
       });
     });
+    this.saveToLocalStorage();
   }
 
   public getSymptoms(assessmentId: string): Symptom[] {
@@ -295,6 +420,7 @@ class LocalHealthStore {
       created_at: new Date().toISOString(),
     };
     this.answers.push(ans);
+    this.saveToLocalStorage();
     return ans;
   }
 
@@ -308,7 +434,7 @@ class LocalHealthStore {
       ...risk,
       created_at: new Date().toISOString(),
     };
-    this.riskAssessments.push(newRisk);
+    this.riskAssessments.unshift(newRisk);
 
     const a = this.getAssessmentById(risk.assessment_id);
     this.addTimelineEvent({
@@ -319,11 +445,16 @@ class LocalHealthStore {
       description: risk.summary,
     });
 
+    this.saveToLocalStorage();
     return newRisk;
   }
 
   public getRiskAssessment(assessmentId: string): RiskAssessment | undefined {
     return this.riskAssessments.find((r) => r.assessment_id === assessmentId);
+  }
+
+  public getAllRiskAssessments(): RiskAssessment[] {
+    return this.riskAssessments;
   }
 
   public saveActionPlan(plan: Omit<ActionPlan, "id" | "created_at" | "updated_at">): ActionPlan {
@@ -333,7 +464,8 @@ class LocalHealthStore {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
-    this.actionPlans.push(newPlan);
+    this.actionPlans.unshift(newPlan);
+    this.saveToLocalStorage();
     return newPlan;
   }
 
@@ -342,8 +474,7 @@ class LocalHealthStore {
   }
 
   public getAllActionPlans(userId: string = DEMO_USER_ID): ActionPlan[] {
-    const userAssessmentIds = new Set(this.getAssessments(userId).map((a) => a.id));
-    return this.actionPlans.filter((p) => userAssessmentIds.has(p.assessment_id));
+    return this.actionPlans;
   }
 
   public scheduleFollowUp(params: {
@@ -359,7 +490,7 @@ class LocalHealthStore {
       created_at: new Date().toISOString(),
       completed_at: null,
     };
-    this.followUps.push(followUp);
+    this.followUps.unshift(followUp);
 
     const a = this.getAssessmentById(params.assessmentId);
     this.addTimelineEvent({
@@ -370,12 +501,12 @@ class LocalHealthStore {
       description: `Automated recovery check-in scheduled for ${new Date(scheduledFor).toLocaleTimeString()} (${params.hours}h).`,
     });
 
+    this.saveToLocalStorage();
     return followUp;
   }
 
   public getFollowUps(userId: string = DEMO_USER_ID): FollowUp[] {
-    const userAssessmentIds = new Set(this.getAssessments(userId).map((a) => a.id));
-    return this.followUps.filter((f) => userAssessmentIds.has(f.assessment_id));
+    return this.followUps;
   }
 
   public getFollowUpById(id: string): FollowUp | undefined {
@@ -417,6 +548,7 @@ class LocalHealthStore {
       });
     }
 
+    this.saveToLocalStorage();
     return response;
   }
 
@@ -441,6 +573,7 @@ class LocalHealthStore {
       description: item.escalation_reason || item.change_summary,
     });
 
+    this.saveToLocalStorage();
     return item;
   }
 

@@ -22,13 +22,22 @@ export async function questionAgent(params: {
     };
   }
 
-  const systemInstruction = `You are the CareWatch Adaptive Questioning Agent.
+  const systemInstruction = `You are the CareWatch Adaptive Clinical Questioning Agent.
 Your goal is to safely triage the user's condition by asking ONE targeted clinical question at a time.
-Do not ask multiple questions at once.
-Do not ask repetitive questions.
-Probe for: severity (1-10), duration, red flags (fever, visual changes, weakness, neck stiffness), and functional impact.
-If 3 to 4 questions have already clarified the key uncertainties, set sufficient_information_gathered to true.
-Respond in ${language === "ur_roman" ? "Roman Urdu" : "English"}.`;
+User's primary concern: "${primaryConcern}"
+Extracted symptoms: ${JSON.stringify(extractedSymptoms)}
+
+CRITICAL RULES:
+1. Tailor the question DIRECTLY to what the user reported ("${primaryConcern}").
+   - If abdominal/stomach: ask about location, eating, nausea, fever.
+   - If respiratory/cough/throat: ask about breathing difficulty, fever, phlegm.
+   - If musculoskeletal/injury: ask about swelling, ability to bear weight, mechanism.
+   - If headache: ask about vision changes, neck stiffness, light sensitivity.
+2. Ask only ONE clear, empathetic question at a time.
+3. Provide 3-4 sensible quick-choice options in the "options" array for mobile taps.
+4. If this is question 3 or 4, or if key red flags and severity have been covered, set sufficient_information_gathered to true.
+5. Respond in ${language === "ur_roman" ? "Roman Urdu where user-facing, but keep keys in English" : "English"}.
+6. Output valid JSON with fields: question, reason, question_type, options, sufficient_information_gathered.`;
 
   const userPrompt = `
 Primary concern: "${primaryConcern}"
@@ -36,20 +45,21 @@ Identified symptoms: ${JSON.stringify(extractedSymptoms)}
 Previous questions and answers:
 ${previousAnswers.map((qa, i) => `Q${i + 1}: ${qa.question} -> A: ${qa.answer}`).join("\n")}
 
-Generate the single next best question.`;
+Generate the single next best clinical question.`;
 
   return generateStructuredAI<QuestionResult>({
     systemInstruction,
     userPrompt,
     schema: QuestionSchema,
     fallback: () => {
-      // Clinical progressive questions fallback
+      const concernName = extractedSymptoms[0]?.name || primaryConcern.slice(0, 35);
+
       if (currentCount === 0) {
         return {
           question: language === "ur_roman" 
-            ? "1 se 10 ke pemanay par aap is takleef ki shiddat ko kya number dein ge?"
-            : "On a scale of 1 to 10, how intense would you rate this discomfort right now?",
-          reason: "Assessing quantitative baseline severity",
+            ? `1 se 10 ke scale par aap is takleef (${concernName}) ki shiddat ko kya number dein ge?`
+            : `On a scale of 1 to 10, how intense is your ${concernName.toLowerCase()} right now?`,
+          reason: "Assessing baseline clinical severity",
           question_type: "severity",
           options: ["1-3 (Mild)", "4-6 (Moderate)", "7-8 (Severe)", "9-10 (Very severe)"],
           sufficient_information_gathered: false,
@@ -59,11 +69,11 @@ Generate the single next best question.`;
       if (currentCount === 1) {
         return {
           question: language === "ur_roman"
-            ? "Kya aap ko bukhar, gardan mein dard ya achanak chakkar aane ki shikayat hai?"
-            : "Have you noticed any fever, neck stiffness, vision changes, or sudden unsteadiness?",
-          reason: "Screening for neurological and systemic red flags",
+            ? `Yeh takleef kab shuru hui, aur kya bukhar ya achanak kamzori jese alamaat sath hain?`
+            : `How long have you had this ${concernName.toLowerCase()}, and have you noticed any fever or sudden weakness?`,
+          reason: "Evaluating duration and acute red flags",
           question_type: "red_flag_check",
-          options: ["None of these", "Mild dizziness / lightheadedness", "Fever present", "Visual changes / blurriness"],
+          options: ["Started today", "Past 2-3 days", "Fever or chills present", "No red flags, just steady pain"],
           sufficient_information_gathered: false,
         };
       }
@@ -71,11 +81,11 @@ Generate the single next best question.`;
       if (currentCount === 2) {
         return {
           question: language === "ur_roman"
-            ? "Yeh takleef kab zyada hoti hai aur kya aaraam karne ya paani peene se behtari aati hai?"
-            : "Does resting in a quiet dark room, drinking water, or moving around make it better or worse?",
-          reason: "Checking aggravating and relieving factors",
+            ? `Kya aaraam karne, khane peene ya chalne phirne se is mein behtari ya kami aati hai?`
+            : `Does resting, moving, eating, or changing positions make the discomfort better or worse?`,
+          reason: "Assessing triggers and relieving factors",
           question_type: "triggers",
-          options: ["Better with rest and fluids", "Worse when standing or moving", "No change with anything", "Getting progressively worse"],
+          options: ["Better with rest", "Worse with movement or exertion", "No change with anything", "Getting progressively worse"],
           sufficient_information_gathered: false,
         };
       }
@@ -83,17 +93,17 @@ Generate the single next best question.`;
       if (currentCount === 3) {
         return {
           question: language === "ur_roman"
-            ? "Kya aap ne is ke liye koi dawa li hai ya pehle se koi tibbi masla hai?"
-            : "Have you taken any pain relievers or do you have any pre-existing health conditions?",
-          reason: "Checking medication history and baseline risk",
+            ? `Kya aap ne koi dawa li hai ya pehle se koi mutaliqa bemari hai?`
+            : `Have you taken any medication for this, or do you have any relevant medical history?`,
+          reason: "Checking medication response and baseline risk",
           question_type: "associated_symptoms",
-          options: ["Took over-the-counter pain relief", "No medications taken", "History of migraines / tension headaches", "High blood pressure history"],
+          options: ["Took over-the-counter medicine", "No medication taken", "Pre-existing related condition", "First time experiencing this"],
           sufficient_information_gathered: true,
         };
       }
 
       return {
-        question: "We have gathered enough clinical context to prepare your safety assessment.",
+        question: "We have gathered enough clinical context to evaluate your condition and guide next steps.",
         reason: "Sufficient data gathered",
         question_type: "general",
         sufficient_information_gathered: true,

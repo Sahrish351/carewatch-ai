@@ -83,17 +83,31 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // 4. Role-based enforcement
+  // 4. Strict Role-based enforcement
   if (pathname.startsWith("/admin") && userRole !== "admin") {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
-  if (pathname.startsWith("/clinician") && userRole !== "clinician" && userRole !== "admin") {
+  if (pathname.startsWith("/clinician") && userRole !== "clinician") {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = userRole === "admin" ? "/admin" : "/dashboard";
     return NextResponse.redirect(url);
+  }
+
+  // Redirect admins and clinicians visiting the patient dashboard directly to their workspaces
+  if (pathname === "/dashboard" || pathname === "/dashboard/") {
+    if (userRole === "admin") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/admin";
+      return NextResponse.redirect(url);
+    }
+    if (userRole === "clinician") {
+      const url = request.nextUrl.clone();
+      url.pathname = "/clinician";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;

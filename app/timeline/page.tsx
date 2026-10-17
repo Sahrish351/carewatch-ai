@@ -25,7 +25,21 @@ export default function TimelinePage() {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
 
   useEffect(() => {
-    setEvents(healthStore.getTimelineEvents());
+    const loadTimeline = async () => {
+      try {
+        const res = await fetch("/api/assessment/list");
+        if (res.ok) {
+          const apiData = await res.json();
+          healthStore.syncFromServer({
+            timelineEvents: apiData.timelineEvents,
+          });
+        }
+      } catch {}
+
+      setEvents(healthStore.getTimelineEvents());
+    };
+
+    loadTimeline();
   }, []);
 
   const getEventIcon = (type: string) => {

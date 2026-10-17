@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AgentStatus } from "@/components/ui/agent-status";
 import { Disclaimer } from "@/components/ui/disclaimer";
+import { healthStore } from "@/lib/services/storage-service";
 import {
   Sparkles,
   ArrowRight,
@@ -79,6 +80,28 @@ export default function NewAssessmentPage() {
       if (!res.ok) throw new Error(data.error);
 
       setAssessmentId(data.assessmentId);
+
+      // Immediately sync new assessment and symptoms to client healthStore
+      const title = concernInput.length > 40 ? concernInput.slice(0, 37) + "..." : concernInput;
+      healthStore.syncFromServer({
+        assessments: [
+          {
+            id: data.assessmentId,
+            user_id: "demo-user-carewatch",
+            title,
+            status: "questioning",
+            primary_concern: concernInput,
+            started_at: new Date().toISOString(),
+            completed_at: null,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          },
+        ],
+      });
+      if (data.intake?.symptoms) {
+        healthStore.addSymptoms(data.assessmentId, data.intake.symptoms);
+      }
+
       setCurrentStep("questioning");
       setAgentStatus("questioning");
 
@@ -118,6 +141,14 @@ export default function NewAssessmentPage() {
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
     setMessages((prev) => [...prev, userMsg]);
+
+    // Save answer to client store
+    healthStore.addAnswer({
+      assessmentId,
+      question: currentQuestion.question,
+      answer: textToSend,
+      questionType: currentQuestion.question_type,
+    });
 
     try {
       // Check if current question indicated sufficient info gathered
@@ -178,11 +209,30 @@ export default function NewAssessmentPage() {
       });
 
       if (!res.ok) throw new Error("Triage failed");
+      const data = await res.json();
+
+      // Persist full result bundle to local store so results page and dashboard immediately see it
+      if (data.riskAssessment) {
+        healthStore.saveRiskAssessment(data.riskAssessment);
+      }
+      if (data.actionPlan) {
+        healthStore.saveActionPlan(data.actionPlan);
+      }
+      if (data.followUp) {
+        healthStore.scheduleFollowUp({
+          assessmentId: id,
+          hours: data.riskAssessment?.follow_up_hours || 24,
+        });
+      }
+      healthStore.updateAssessmentStatus(
+        id,
+        data.riskAssessment?.tier === "urgent" ? "completed" : "monitoring"
+      );
 
       // Smooth animated delay before redirecting to reveal
       setTimeout(() => {
         router.push(`/assessment/${id}/result`);
-      }, 1500);
+      }, 1200);
     } catch (err) {
       console.error(err);
       alert("Error in triage assessment. Redirecting to dashboard.");

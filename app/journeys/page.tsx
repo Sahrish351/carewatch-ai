@@ -17,15 +17,30 @@ export default function JourneysPage() {
   const [riskMap, setRiskMap] = useState<Record<string, RiskAssessment>>({});
 
   useEffect(() => {
-    const list = healthStore.getAssessments();
-    setAssessments(list);
+    const loadJourneys = async () => {
+      try {
+        const res = await fetch("/api/assessment/list");
+        if (res.ok) {
+          const apiData = await res.json();
+          healthStore.syncFromServer({
+            assessments: apiData.assessments,
+            riskAssessments: apiData.riskAssessments,
+          });
+        }
+      } catch {}
 
-    const map: Record<string, RiskAssessment> = {};
-    list.forEach((a) => {
-      const r = healthStore.getRiskAssessment(a.id);
-      if (r) map[a.id] = r;
-    });
-    setRiskMap(map);
+      const list = healthStore.getAssessments();
+      setAssessments(list);
+
+      const map: Record<string, RiskAssessment> = {};
+      list.forEach((a) => {
+        const r = healthStore.getRiskAssessment(a.id);
+        if (r) map[a.id] = r;
+      });
+      setRiskMap(map);
+    };
+
+    loadJourneys();
   }, []);
 
   return (

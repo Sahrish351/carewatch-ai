@@ -37,12 +37,15 @@ export function AppHeader({
   const handleResetDemo = async () => {
     setResetting(true);
     try {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("carewatch_health_store_v1");
+      }
       await fetch("/api/demo/reset", { method: "POST" });
       setResetDone(true);
       setTimeout(() => {
         setResetDone(false);
         window.location.href = "/dashboard";
-      }, 1000);
+      }, 800);
     } catch (e) {
       console.error(e);
     } finally {

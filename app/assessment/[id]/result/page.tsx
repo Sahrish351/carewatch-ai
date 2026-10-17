@@ -43,36 +43,63 @@ function AssessmentResultContent() {
   useEffect(() => {
     if (!assessmentId) return;
 
-    const a = healthStore.getAssessmentById(assessmentId);
-    if (!a) {
-      router.push("/dashboard");
-      return;
-    }
-    setAssessment(a);
+    const loadData = async () => {
+      let a = healthStore.getAssessmentById(assessmentId);
+      let r = healthStore.getRiskAssessment(assessmentId);
+      let p = healthStore.getActionPlan(assessmentId);
+      let fu = healthStore.getFollowUps().find((f) => f.assessment_id === assessmentId);
+      let symptoms = healthStore.getSymptoms(assessmentId);
 
-    const r = healthStore.getRiskAssessment(assessmentId);
-    setRisk(r || null);
+      if (!a || !r || !p) {
+        try {
+          const res = await fetch(`/api/assessment/${assessmentId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.assessment) {
+              a = data.assessment;
+              r = data.riskAssessment || null;
+              p = data.actionPlan || null;
+              fu = data.followUp || null;
+              symptoms = data.symptoms || [];
 
-    const p = healthStore.getActionPlan(assessmentId);
-    setActionPlan(p || null);
+              // Sync into client store
+              healthStore.syncFromServer({
+                assessments: [a!],
+                riskAssessments: r ? [r] : [],
+                actionPlans: p ? [p] : [],
+                followUps: fu ? [fu] : [],
+              });
+            }
+          }
+        } catch {
+          // fallback
+        }
+      }
 
-    const fu = healthStore.getFollowUps().find((f) => f.assessment_id === assessmentId);
-    setFollowUp(fu || null);
+      if (!a) {
+        router.push("/dashboard");
+        return;
+      }
 
-    // Retrieve matched evidence
-    const symptoms = healthStore.getSymptoms(assessmentId);
-    evidenceAgent({
-      primaryConcern: a.primary_concern,
-      symptoms,
-      tier: r?.tier || "monitor",
-    }).then((ev) => setEvidenceList(ev));
+      setAssessment(a);
+      setRisk(r || null);
+      setActionPlan(p || null);
+      setFollowUp(fu || null);
 
-    // Smooth reveal animation
-    const timer = setTimeout(() => {
-      setRevealState("revealed");
-    }, 1200);
+      evidenceAgent({
+        primaryConcern: a.primary_concern,
+        symptoms,
+        tier: r?.tier || "monitor",
+      }).then((ev) => setEvidenceList(ev));
 
-    return () => clearTimeout(timer);
+      const timer = setTimeout(() => {
+        setRevealState("revealed");
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    };
+
+    loadData();
   }, [assessmentId, router]);
 
   if (!assessment || !risk || !actionPlan) {

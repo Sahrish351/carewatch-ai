@@ -96,7 +96,29 @@ CRITICAL SAFETY & MEDICAL BOUNDARIES:
     ]);
 
     const text = result.response.text();
-    const parsedJson = JSON.parse(text);
+    let parsedJson: any;
+
+    // Helper to safely strip markdown and extract valid JSON
+    let cleaned = text.trim();
+    if (cleaned.startsWith("```json")) {
+      cleaned = cleaned.replace(/^```json\s*/i, "").replace(/```\s*$/i, "").trim();
+    } else if (cleaned.startsWith("```")) {
+      cleaned = cleaned.replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+    }
+
+    try {
+      parsedJson = JSON.parse(cleaned);
+    } catch {
+      // Fallback: search for outermost JSON object or array
+      const firstBrace = cleaned.indexOf("{");
+      const lastBrace = cleaned.lastIndexOf("}");
+      if (firstBrace !== -1 && lastBrace > firstBrace) {
+        parsedJson = JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
+      } else {
+        throw new Error(`Unable to parse AI JSON response: ${cleaned.slice(0, 100)}`);
+      }
+    }
+
     const validated = schema.parse(parsedJson);
 
     return {
@@ -108,7 +130,7 @@ CRITICAL SAFETY & MEDICAL BOUNDARIES:
       },
     };
   } catch (error: any) {
-    console.error("[CareWatch AI] Gemini live inference failed or rejected by schema:", error?.message || error);
+    console.error("[CareWatch AI] Gemini inference or validation warning:", error?.message || error);
     const fallbackData = fallback();
     return {
       ...fallbackData,

@@ -46,17 +46,42 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. Fetch current user session
+    // 1. Fetch current user session and isolate roles
     fetch("/api/auth/me")
       .then((res) => res.json())
       .then((data) => {
         if (data.authenticated && data.user) {
+          // Strict role isolation: redirect clinicians and admins to their respective workspaces
+          if (data.user.role === "admin") {
+            window.location.href = "/admin";
+            return;
+          }
+          if (data.user.role === "clinician") {
+            window.location.href = "/clinician";
+            return;
+          }
           setUser(data.user);
         }
       })
-      .catch(() => {})
-      .finally(() => {
-        // 2. Load health data
+      .catch(() => {});
+
+    // 2. Fetch all user assessments from server and sync
+    const loadHealthData = async () => {
+      try {
+        const res = await fetch("/api/assessment/list");
+        if (res.ok) {
+          const apiData = await res.json();
+          healthStore.syncFromServer({
+            assessments: apiData.assessments,
+            riskAssessments: apiData.riskAssessments,
+            actionPlans: apiData.actionPlans,
+            followUps: apiData.followUps,
+            timelineEvents: apiData.timelineEvents,
+          });
+        }
+      } catch (e) {
+        console.warn("Failed to fetch assessment list", e);
+      } finally {
         const userAssessments = healthStore.getAssessments();
         const userFollowUps = healthStore.getFollowUps();
         const userTimeline = healthStore.getTimelineEvents();
@@ -72,48 +97,22 @@ export default function DashboardPage() {
         setDocuments(userDocs);
 
         if (userAssessments.length > 0) {
+          // Always pick latest assessment's triage
           setRiskAssessment(healthStore.getRiskAssessment(userAssessments[0].id));
         }
         setLoading(false);
-      });
+      }
+    };
+
+    loadHealthData();
   }, []);
 
-  const activeAssessment = assessments.find((a) => a.status !== "resolved");
+  const activeAssessment = assessments[0];
   const dueFollowUp = followUps.find((f) => f.status === "due" || f.status === "scheduled");
 
   return (
     <AppShell>
       <div className="space-y-8 max-w-6xl mx-auto antialiased">
-        {/* Role Portal Alert if Clinician or Admin is logged in */}
-        {user && (user.role === "clinician" || user.role === "admin") && (
-          <div className="p-3.5 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-between text-xs text-sky-950">
-            <div className="flex items-center gap-2">
-              <Stethoscope className="w-4 h-4 text-[#0284C7]" />
-              <span>
-                You are currently previewing the Patient Portal as <strong>{user.name}</strong> ({user.role.toUpperCase()}).
-              </span>
-            </div>
-            <Link href={user.role === "admin" ? "/admin" : "/clinician"}>
-              <Button size="sm" className="h-7 text-xs bg-[#0284C7] hover:bg-[#0369A1] text-white">
-                Go to {user.role === "admin" ? "Admin Console" : "Clinician Triage"} <ArrowRight className="w-3 h-3 ml-1" />
-              </Button>
-            </Link>
-          </div>
-        )}
-
-        {/* Demo Mode Notice */}
-        {user?.isDemo && (
-          <div className="p-3 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span><strong>Demonstration Mode:</strong> Illustrative patient journey loaded (Sarah Jenkins) for testing the continuous follow-up loop.</span>
-            </span>
-            <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded shrink-0 self-start sm:self-auto">
-              Sample Case
-            </span>
-          </div>
-        )}
-
         {/* Welcome Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -318,6 +317,64 @@ export default function DashboardPage() {
             </Card>
           </div>
         </div>
+
+        {/* All Recorded Health Assessments */}
+        {assessments.length > 0 && (
+          <Card className="border-[#EDE8DF] shadow-xs">
+            <CardHeader className="pb-3 border-b border-[#EDE8DF] flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="text-base text-[#263735] flex items-center gap-2">
+                  <Compass className="w-4 h-4 text-[#174E4A]" />
+                  All Recorded Health Assessments ({assessments.length})
+                </CardTitle>
+                <CardDescription className="text-xs text-[#627472]">
+                  Every assessment you complete is tracked and preserved across your continuous recovery journey
+                </CardDescription>
+              </div>
+              <Link href="/journeys" className="text-xs text-[#174E4A] font-bold hover:underline flex items-center gap-1">
+                View All Journeys <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </CardHeader>
+            <CardContent className="p-5">
+              <div className="space-y-3">
+                {assessments.map((a, idx) => {
+                  const risk = healthStore.getRiskAssessment(a.id);
+                  return (
+                    <div
+                      key={a.id}
+                      className="p-3.5 rounded-2xl bg-[#FAF8F3] border border-[#EDE8DF] hover:border-[#174E4A]/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[#263735]">{a.title}</span>
+                          {idx === 0 && (
+                            <span className="text-[10px] font-bold bg-[#EFF7F1] text-[#174E4A] border border-[#DDEBE2] px-2 py-0.5 rounded-full">
+                              Latest
+                            </span>
+                          )}
+                          {risk && <RiskBadge tier={risk.tier} size="sm" />}
+                        </div>
+                        <p className="text-xs text-[#627472] line-clamp-1">
+                          &quot;{a.primary_concern}&quot;
+                        </p>
+                        <span className="text-[10px] text-[#627472]/80">
+                          Started: {formatDate(a.started_at)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                        <Link href={`/assessment/${a.id}/result`}>
+                          <Button size="sm" variant="outline" className="text-xs h-8 border-[#EDE8DF] text-[#174E4A]">
+                            View Plan <ArrowRight className="w-3 h-3 ml-1" />
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Symptom Trajectory Comparison Section */}
         <Card className="border-[#EDE8DF] shadow-xs">

@@ -231,45 +231,6 @@ export function AppSidebar({
               </Link>
             );
           })}
-
-          {/* Quick Switch to Patient/Clinician/Admin for Evaluators */}
-          {(user?.role === "admin" || user?.role === "clinician" || user?.isDemo) && (
-            <div className="pt-4 border-t border-[#EDE8DF] mt-4 space-y-1">
-              <span className="px-3 text-[10px] uppercase font-bold text-[#627472] tracking-wider block mb-1">
-                Role Views
-              </span>
-              {!pathname.startsWith("/dashboard") && (
-                <Link
-                  href="/dashboard"
-                  onClick={isMobile ? onClose : undefined}
-                  className="flex items-center gap-2.5 px-3.5 py-2 rounded-lg text-xs font-medium text-[#627472] hover:bg-[#FAF8F3] hover:text-[#174E4A]"
-                >
-                  <User className="w-3.5 h-3.5 text-[#174E4A]" />
-                  <span>Patient Dashboard</span>
-                </Link>
-              )}
-              {!pathname.startsWith("/clinician") && (
-                <Link
-                  href="/clinician"
-                  onClick={isMobile ? onClose : undefined}
-                  className="flex items-center gap-2.5 px-3.5 py-2 rounded-lg text-xs font-medium text-[#627472] hover:bg-[#FAF8F3] hover:text-[#0284C7]"
-                >
-                  <Stethoscope className="w-3.5 h-3.5 text-[#0284C7]" />
-                  <span>Clinician Workspace</span>
-                </Link>
-              )}
-              {!pathname.startsWith("/admin") && (
-                <Link
-                  href="/admin"
-                  onClick={isMobile ? onClose : undefined}
-                  className="flex items-center gap-2.5 px-3.5 py-2 rounded-lg text-xs font-medium text-[#627472] hover:bg-[#FAF8F3] hover:text-[#D97706]"
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#D97706]" />
-                  <span>Admin Console</span>
-                </Link>
-              )}
-            </div>
-          )}
         </nav>
       </div>
 

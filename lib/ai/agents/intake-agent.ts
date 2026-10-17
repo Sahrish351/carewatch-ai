@@ -8,10 +8,16 @@ export async function intakeAgent(params: {
   const { userInput, language = "en" } = params;
 
   const systemInstruction = `You are the CareWatch Intake Agent.
-Analyze the user's initial health concern.
-Extract primary symptoms, duration, severity if mentioned, context factors, and identify what critical clinical information is missing.
-Identify if any immediate red flags are present (e.g. crushing chest pain, difficulty breathing, sudden face drooping).
-Respond in ${language === "ur_roman" ? "Roman Urdu where user-facing, but keep keys in English" : "English"}.`;
+Analyze the user's initial health concern carefully.
+Extract:
+1. "extracted_concern": Clean concise title/summary of what the user is experiencing.
+2. "symptoms": Array of objects: [{ name: string, duration: string, severity: number (1-10), description: string }]
+3. "context_factors": Array of contextual strings (e.g. onset, activity, medical history if mentioned)
+4. "missing_critical_info": Array of strings representing what needs to be asked next.
+5. "initial_safety_flag": boolean (true if severe chest pain, inability to breathe, slurred speech, acute emergency signs).
+
+Respond in ${language === "ur_roman" ? "Roman Urdu where user-facing, but keep JSON keys in English" : "English"}.
+Return ONLY valid JSON matching this schema.`;
 
   const userPrompt = `User's reported concern: "${userInput}"`;
 
@@ -20,55 +26,38 @@ Respond in ${language === "ur_roman" ? "Roman Urdu where user-facing, but keep k
     userPrompt,
     schema: IntakeSchema,
     fallback: () => {
-      // Clinical deterministic fallback based on keywords
       const lower = userInput.toLowerCase();
-      const hasHeadache = lower.includes("headache") || lower.includes("sar dard") || lower.includes("head");
-      const hasDizziness = lower.includes("dizzy") || lower.includes("chakkar") || lower.includes("dizziness");
-      const hasFever = lower.includes("fever") || lower.includes("bukhar") || lower.includes("temp");
-      const hasEmergency = lower.includes("chest pain") || lower.includes("breathing") || lower.includes("unconscious");
+      const hasEmergency = lower.includes("chest pain") || lower.includes("breathing") || lower.includes("unconscious") || lower.includes("fainted");
 
-      const symptoms = [];
-      if (hasHeadache) {
-        symptoms.push({
-          name: "Headache",
-          duration: lower.includes("three days") || lower.includes("3 days") ? "3 days" : "Several hours to days",
-          severity: 5,
-          description: "Pain or discomfort in head region",
-        });
-      }
-      if (hasDizziness) {
-        symptoms.push({
-          name: "Dizziness / Lightheadedness",
-          duration: "Recent onset",
-          severity: 6,
-          description: "Unsteadiness or vertigo",
-        });
-      }
-      if (hasFever) {
-        symptoms.push({
-          name: "Fever",
-          duration: "1-2 days",
-          severity: 6,
-          description: "Elevated body temperature",
-        });
-      }
-      if (symptoms.length === 0) {
-        symptoms.push({
-          name: "Reported discomfort",
-          duration: "Unspecified",
-          severity: 4,
-          description: userInput.slice(0, 80),
-        });
+      // Extract primary symptom from text
+      let symptomName = "Health Concern";
+      if (lower.includes("headache") || lower.includes("head") || lower.includes("sar dard")) symptomName = "Headache";
+      else if (lower.includes("stomach") || lower.includes("abdominal") || lower.includes("pet") || lower.includes("belly")) symptomName = "Abdominal / Stomach Discomfort";
+      else if (lower.includes("fever") || lower.includes("bukhar") || lower.includes("temp")) symptomName = "Fever";
+      else if (lower.includes("throat") || lower.includes("gala") || lower.includes("cough") || lower.includes("khansi")) symptomName = "Throat / Respiratory Discomfort";
+      else if (lower.includes("back") || lower.includes("kamar")) symptomName = "Back Discomfort";
+      else if (lower.includes("dizzy") || lower.includes("chakkar")) symptomName = "Dizziness / Lightheadedness";
+      else if (lower.includes("nausea") || lower.includes("vomit") || lower.includes("ulti")) symptomName = "Nausea / Digestive Discomfort";
+      else {
+        // Use user's input as the symptom name directly
+        symptomName = userInput.length > 35 ? userInput.slice(0, 32) + "..." : userInput;
       }
 
       return {
         extracted_concern: userInput,
-        symptoms,
-        context_factors: ["Onset described by patient", "Awaiting adaptive questioning"],
+        symptoms: [
+          {
+            name: symptomName,
+            duration: lower.includes("day") || lower.includes("din") ? "Multiple days" : "Recent onset",
+            severity: 5,
+            description: userInput.slice(0, 100),
+          },
+        ],
+        context_factors: ["Reported by patient in initial intake"],
         missing_critical_info: [
-          "Exact onset pattern and progression",
-          "Presence of visual changes, fever, or neck stiffness",
-          "Hydration, sleep, or stress factors",
+          "Exact duration and onset pattern",
+          "Associated red flag symptoms",
+          "Aggravating or relieving factors",
         ],
         initial_safety_flag: hasEmergency,
       };
